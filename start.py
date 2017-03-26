@@ -3,10 +3,6 @@
 
 import argparse
 import os
-import shutil
-
-shutil.rmtree
-
 
 def createParser():
     parser = argparse.ArgumentParser()
@@ -23,14 +19,18 @@ def createParser():
     namespace = parser.parse_args() #(sys.args[1:])
 
     return namespace
+
+
+
 class MyException(Exception):
     pass
+
 class HandlerRemove(object):
     def remove_dir(self, path):
         if not self.is_dir and not self.is_recursive:
             print("cannot remove '{}', it's dir".format(path))
         elif self.is_dir:
-            if os.listdir(path) != 0:
+            if len(os.listdir(path)) != 0:
                 print("not empty")
             else:
                 os.rmdir(path)
