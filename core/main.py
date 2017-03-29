@@ -14,6 +14,8 @@ def createParser():
     removeParser.add_argument('-d', '--dir', action='store_true')
     removeParser.add_argument('-r', '--recursive', action='store_true')
     removeParser.add_argument('-i', '--interactive', action='store_true')
+    removeParser.add_argument('-b', '--basket', action='store_true')
+    removeParser.add_argument('-p', '--basket_path', action='store', default='basket')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('path')
@@ -22,11 +24,11 @@ def createParser():
 
     return namespace
 
-def hello():
-    print 'hello'
+
 def alirem():
     args = createParser()
-    handler = ar.HandlerRemove(args.dir, args.interactive, args.recursive)
+    handler = ar.HandlerRemove(args.dir, args.interactive, args.recursive,
+                               args.basket, args.basket_path)
     if args.command == "remove":
         try:
             handler.run(args.path)
@@ -36,18 +38,6 @@ def alirem():
         print("invalid operation")
 
 
-# def run_restore (namespace):
-#     print(os.path.isfile(namespace.remove))
-#     print(os.path.isdir(namespace.remove))
-
 if __name__ == '__main__':
     alirem()
-    # args = createParser()
-    # handler = HandlerRemove(args.dir, False, args.recursive)
-    # if args.command == "remove":
-    #     try:
-    #         handler.run_remove(args.path)
-    #     except MyException:
-    #         print("ouuups")
-    # else:
-    #     print("invalid operation")
+    
