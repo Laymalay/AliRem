@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 virtualenv env
 ./env/bin/python setup.py install
-source ./env/bin/activate
+#source ./env/bin/activate

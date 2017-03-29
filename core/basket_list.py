@@ -12,7 +12,8 @@ class Basket_list(object):
         self.array = []
     def search(self, name, basket_path):
         for el in self.array:
-            if (el.name == name) and (el.basket_path == os.path.basename(basket_path)):
+            if (os.path.basename(el.index_in_basket) == name) and (
+                    el.basket_path == os.path.basename(basket_path)):
                 return el
         return None
 

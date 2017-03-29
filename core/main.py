@@ -20,7 +20,7 @@ def createParser():
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('name', nargs='+')
     restoreParser.add_argument('-p', '--basket_path', action='store', default='basket')
-
+    restoreParser.add_argument('-f', '--force', action='store_true')
     namespace = parser.parse_args() #(sys.args[1:])
 
     return namespace
@@ -31,13 +31,13 @@ def alirem():
 
     if args.command == "remove":
         handler = ar.HandlerRemove(args.dir, args.recursive,
-                               args.basket, args.basket_path)
+                                   args.basket, args.basket_path)
         try:
             handler.run(args.path)
         except ar.MyException:
             print("ouuups")
     elif args.command == "restore":
-        rs.restore(args.name, args.basket_path)
+        rs.restore(args.name, args.basket_path, args.force)
     else:
         print("invalid operation")
 

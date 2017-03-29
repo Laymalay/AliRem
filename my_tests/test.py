@@ -18,20 +18,20 @@ class TestRemove(unittest.TestCase):
         os.makedirs(self.dir_path+"/dir2"+"/dir3")
 
     def test_run_remove_empty_dir(self):
-        handler_empty_dir = HandlerRemove(True, False, False)
-        handler_empty_dir.run_remove(self.empty_dir_path)
+        handler_empty_dir = HandlerRemove(True, False, False, 'basket')
+        handler_empty_dir.run(self.empty_dir_path)
         self.assertEqual(os.path.exists(self.empty_dir_path), False)
     def test_run_remove_dir(self):
-        handler_dir = HandlerRemove(False, False, True)
-        handler_dir.run_remove(self.dir_path)
+        handler_dir = HandlerRemove(False, True, False, 'basket')
+        handler_dir.run(self.dir_path)
         self.assertEqual(os.path.exists(self.dir_path), False)
     def test_run_remove_file(self):
-        handler_file = HandlerRemove(False, False, False)
-        handler_file.run_remove(self.file_path)
+        handler_file = HandlerRemove(False, False, False, 'basket')
+        handler_file.run(self.file_path)
         self.assertEqual(os.path.exists(self.file_path), False)
     def test_run_remove_not_empty_dir_with_msg(self):
-        handler_file = HandlerRemove(True, False, False)
-        handler_file.run_remove(self.dir_path)
+        handler_file = HandlerRemove(True, False, False, 'basket')
+        handler_file.run(self.dir_path)
         self.assertEqual(os.path.exists(self.dir_path), True)
     def tearDown(self):
         subprocess.call(["rm", "-rf", self.testbead_path])
