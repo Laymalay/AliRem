@@ -44,7 +44,7 @@ class Basket_list(object):
             size = 0
             for el in self.array:
                 size += getsize.get_size(el.index_in_basket)
-            print 'TOTAL SIZE:'+ size
+            print 'TOTAL SIZE:'+ str(size)
         else:
             if self.array == []:
                 print 'EMPTY'
