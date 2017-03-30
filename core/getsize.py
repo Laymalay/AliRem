@@ -1,6 +1,6 @@
 import os
 def get_dir_size(directory):
-    total_size = os.path.getsize(directory)
+    total_size = 0
     for item in os.listdir(directory):
         itempath = os.path.join(directory, item)
         if os.path.isfile(itempath):

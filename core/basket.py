@@ -4,7 +4,7 @@ import shutil
 import os
 import datetime
 import core.basket_list as b_list
-def go_basket(basket_path, path):
+def go_basket(basket_path, path, is_dir, is_recursive):
     bs = b_list.Basket_list()
     bs.load()
     if not os.path.exists(basket_path):
@@ -18,8 +18,10 @@ def go_basket(basket_path, path):
     if os.path.isdir(path):
         dir_path = os.path.join(basket_path, os.path.basename(path))
         dir_path = check_in_basket(basket_path, dir_path)
-        shutil.copytree(path, dir_path)
-        bs.add(os.path.basename(path), path, basket_path, dir_path, datetime.datetime.now())
+        if (len(os.listdir(path)) != 0 and is_recursive
+                and not is_dir) or (len(os.listdir(path)) == 0 and is_dir):
+            shutil.copytree(path, dir_path)
+            bs.add(os.path.basename(path), path, basket_path, dir_path, datetime.datetime.now())
         bs.save()
 
 

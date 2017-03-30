@@ -12,9 +12,9 @@ def createParser():
     subparsers = parser.add_subparsers(dest='command')
 
     clearParser = subparsers.add_parser('clear')
-    clearParser.add_argument('-m', '--clearmode', action='store', default='time')
-    clearParser.add_argument('-t', '--deltatime', action='store', default='320')
-    clearParser.add_argument('-s', '--size', action='store', default='0')
+    clearParser.add_argument('-m', '--clearmode', action='store', default='size')
+    clearParser.add_argument('-t', '--deltatime', action='store', default='120')
+    clearParser.add_argument('-s', '--size', action='store', default='10000')
     clearParser.add_argument('-p', '--basket_path', action='store', default='basket')
     clearParser.add_argument('-l', '--show', action='store_true')
 
