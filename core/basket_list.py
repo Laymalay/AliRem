@@ -1,5 +1,9 @@
 import pickle
 import os
+import datetime
+import core.getsize as getsize
+
+
 class element(object):
     def __init__(self, name, rm_path, basket_path, index_in_basket, time):
         self.rm_path = rm_path
@@ -37,11 +41,12 @@ class Basket_list(object):
             print 'EMPTY'
         print '\n'
         for el in self.array:
-
             print 'NAME: '+el.name
             print 'RM_PATH: '+el.rm_path
             print 'BASKET: '+el.basket_path
             print 'NAME IN BASKET: '+el.index_in_basket
             print 'TIME: '+str(el.time)
+            print 'TIME IN BASKET(seconds): '+str((datetime.datetime.now()-el.time).seconds)
+            print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
             print '====================================='
         print '\n'
