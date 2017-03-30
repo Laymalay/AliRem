@@ -35,7 +35,7 @@ def restore(name, basket_path, is_force):
                     print ('Such dir={} already exists'.format(os.path.basename(dst)))
                     print ('If you want to replace this directory use -f')
                 else:
-                    shutil.rmtree(dst)
+                    shutil.rmtree(dst)#delete file if exist the same name
                     shutil.copytree(index_name, dst)
                     shutil.rmtree(index_name)
                     bs.remove(element)
