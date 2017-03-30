@@ -33,20 +33,29 @@ class Basket_list(object):
                 self.array = pickle.load(f)
             else:
                 self.array = []
+            for el in self.array:
+                if not os.path.exists(el.index_in_basket):
+                    self.array.remove(el)
     def save(self):
         with open('basket_list.pickle', 'wb') as f:
             pickle.dump(self.array, f)
     def show(self):
-        if self.array == []:
-            print 'EMPTY'
-        print '\n'
-        for el in self.array:
-            print 'NAME: '+el.name
-            print 'RM_PATH: '+el.rm_path
-            print 'BASKET: '+el.basket_path
-            print 'NAME IN BASKET: '+el.index_in_basket
-            print 'TIME: '+str(el.time)
-            print 'TIME IN BASKET(seconds): '+str((datetime.datetime.now()-el.time).seconds)
-            print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
-            print '====================================='
+        if len(self.array) > 10:
+            size = 0
+            for el in self.array:
+                size += getsize.get_size(el.index_in_basket)
+            print 'TOTAL SIZE:'+ size
+        else:
+            if self.array == []:
+                print 'EMPTY'
+            print '\n'
+            for el in self.array:
+                print 'NAME: '+el.name
+                print 'RM_PATH: '+el.rm_path
+                print 'BASKET: '+el.basket_path
+                print 'NAME IN BASKET: '+el.index_in_basket
+                print 'TIME: '+str(el.time)
+                print 'TIME IN BASKET(seconds): '+str((datetime.datetime.now()-el.time).seconds)
+                print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
+                print '====================================='
         print '\n'
