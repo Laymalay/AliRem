@@ -16,11 +16,12 @@ class HandlerRemove(object):
         self.is_recursive = is_recursive
         self.is_basket = is_basket
         self.logger = logger
+
     def run(self, path):
-        for unit in path:
-            if self.is_basket:
-                b.go_basket(self.basket_path, unit, self.is_dir, self.is_recursive, self.logger)
-            self.remove(unit)
+        if self.is_basket:
+            b.go_basket(self.basket_path, path, self.is_dir, self.is_recursive, self.logger)
+        self.remove(path)
+
     def remove(self, path):
         if os.path.isfile(path):
             os.remove(path)

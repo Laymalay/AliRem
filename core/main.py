@@ -63,7 +63,8 @@ def alirem():
         handler = ar.HandlerRemove(args.dir, args.recursive,
                                    args.basket, args.basket_path, logger)
         try:
-            handler.run(args.path)
+            for path in args.path:
+                handler.run(path)
         except ar.MyException:
             print("MyExeption")
     elif args.command == "restore":

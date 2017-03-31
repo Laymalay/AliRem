@@ -40,14 +40,3 @@ class TestRemove(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-# def touch(fname, times=None):
-#     with open(fname, 'a'):
-#         os.utime(fname, times)
-#     # fhandle = open(fname, 'a')
-#     # try:
-#     #     os.utime(fname, times)
-#     # finally:
-#     #     fhandle.close()
-  
