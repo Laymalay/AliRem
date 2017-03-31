@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 import json
 import argparse
-import logging
 import core.logger as log
 import core.remove as ar
 import core.restore as rs
@@ -14,6 +13,10 @@ def createParser():
     subparsers = parser.add_subparsers(dest='command')
 
     parser.add_argument('--configfile', action='store', default='config_file.json')
+    parser.add_argument('-c', '--logmode_cmd', action='store')
+    parser.add_argument('-f', '--logmode_file', action='store')
+    parser.add_argument('-p', '--log_file_path', action='store')
+
     clearParser = subparsers.add_parser('clear')
     clearParser.add_argument('-m', '--clearmode', action='store')
     clearParser.add_argument('-t', '--deltatime', action='store', type=int)
@@ -42,12 +45,14 @@ def activate_mode(config, cmd):
         if v is False:
             cmd[k] = config.get(k)
 def alirem():
-    logger = log.Logger()
+
     args = createParser()
     with open(args.configfile) as config_file:
         config = json.load(config_file)
 
     activate_mode(config, vars(args))
+    logger = log.Logger(args.logmode_file, args.logmode_cmd, args.log_file_path)
+
     if args.command == "clear":
         check_basket = CheckBasket.CheckBasket(logger, args.show, args.basket_path, args.clearmode,
                                                args.deltatime, args.size)

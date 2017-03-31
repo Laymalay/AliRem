@@ -4,5 +4,8 @@
     "size":100,
     "basket_path":"basket",
     "basket":true,
-    "force":true
+    "force":true,
+    "logmode_cmd":"INFO",
+    "logmode_file":"info",
+    "log_file_path":"alirem.log"
 }
