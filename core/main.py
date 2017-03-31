@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-
+import json
 import argparse
 import core.remove as ar
 import core.restore as rs
@@ -8,14 +8,16 @@ import core.check_basket as check_basket
 
 
 def createParser():
+
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
 
+    parser.add_argument('--configfile', action='store', default='config_file.json')
     clearParser = subparsers.add_parser('clear')
-    clearParser.add_argument('-m', '--clearmode', action='store', default='size')
-    clearParser.add_argument('-t', '--deltatime', action='store', default='120')
-    clearParser.add_argument('-s', '--size', action='store', default='10000')
-    clearParser.add_argument('-p', '--basket_path', action='store', default='basket')
+    clearParser.add_argument('-m', '--clearmode', action='store')
+    clearParser.add_argument('-t', '--deltatime', action='store')
+    clearParser.add_argument('-s', '--size', action='store')
+    clearParser.add_argument('-p', '--basket_path', action='store')
     clearParser.add_argument('-l', '--show', action='store_true')
 
     removeParser = subparsers.add_parser('remove')
@@ -23,19 +25,27 @@ def createParser():
     removeParser.add_argument('-d', '--dir', action='store_true')
     removeParser.add_argument('-r', '--recursive', action='store_true')
     removeParser.add_argument('-b', '--basket', action='store_true')
-    removeParser.add_argument('-p', '--basket_path', action='store', default='basket')
+    removeParser.add_argument('-p', '--basket_path', action='store')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('name', nargs='+')
-    restoreParser.add_argument('-p', '--basket_path', action='store', default='basket')
+    restoreParser.add_argument('-p', '--basket_path', action='store')
     restoreParser.add_argument('-f', '--force', action='store_true')
     namespace = parser.parse_args() #(sys.args[1:])
 
     return namespace
 
+def activate_mode(config, cmd):
+    for k, v in cmd.iteritems():
+        if v is None:
+            cmd[k] = config.get(k)
 
 def alirem():
     args = createParser()
+    with open(args.configfile) as config_file:
+        config = json.load(config_file)
+
+    activate_mode(config, vars(args))
     if args.command == "clear":
         check_basket.check_basket(args.show, args.basket_path, args.clearmode,
                                   args.deltatime, args.size)

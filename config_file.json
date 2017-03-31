@@ -1,0 +1,8 @@
+{
+    "clearmode":"size",
+    "deltatime": 120,
+    "size":100,
+    "basket_path":"basket",
+    "basket":true,
+    "force":true
+}
