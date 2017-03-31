@@ -16,6 +16,7 @@ def createParser():
     parser.add_argument('-c', '--logmode_cmd', action='store')
     parser.add_argument('-f', '--logmode_file', action='store')
     parser.add_argument('-p', '--log_file_path', action='store')
+    parser.add_argument('--silent', action='store_true')
 
     clearParser = subparsers.add_parser('clear')
     clearParser.add_argument('-m', '--clearmode', action='store')
@@ -51,7 +52,7 @@ def alirem():
         config = json.load(config_file)
 
     activate_mode(config, vars(args))
-    logger = log.Logger(args.logmode_file, args.logmode_cmd, args.log_file_path)
+    logger = log.Logger(args.logmode_file, args.logmode_cmd, args.log_file_path, args.silent)
 
     if args.command == "clear":
         check_basket = CheckBasket.CheckBasket(logger, args.show, args.basket_path, args.clearmode,

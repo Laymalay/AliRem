@@ -16,23 +16,24 @@ class Logger(object):
         if mode.upper() == 'ERROR':
             return logging.ERROR
 
-    def setup(self, mode_for_file, mode_for_cmd, path):
+    def setup(self, mode_for_file, mode_for_cmd, path, is_silent):
         mode_for_file = self.Parser_mode(mode_for_file)
         mode_for_cmd = self.Parser_mode(mode_for_cmd)
         logger = logging.getLogger('alirem')
         logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(path)
         fh.setLevel(mode_for_file)
-        ch = logging.StreamHandler()
-        ch.setLevel(mode_for_cmd)
         formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
         fh.setFormatter(formatter)
-        ch.setFormatter(formatter)
+        if not is_silent:
+            ch = logging.StreamHandler()
+            ch.setLevel(mode_for_cmd)
+            ch.setFormatter(formatter)
+            logger.addHandler(ch)
         logger.addHandler(fh)
-        logger.addHandler(ch)
         return logger
 
-    def __init__(self, mode_for_file, mode_for_cmd, path):
-        self.logger = self.setup(mode_for_file, mode_for_cmd, path)
+    def __init__(self, mode_for_file, mode_for_cmd, path, is_silent):
+        self.logger = self.setup(mode_for_file, mode_for_cmd, path, is_silent)
     def log(self, msg, level):
         self.logger.log(level, msg)
