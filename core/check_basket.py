@@ -16,12 +16,14 @@ class CheckBasket(object):
         self.size = size
 
     def check_basket(self):
-        basket_list = b_list.Basket_list()
+        basket_list = b_list.BasketList()
         basket_list.load()
         if self.is_show:
             print 'BEFORE:'
             basket_list.show()
+
         if os.path.exists(self.basket_path):
+
             if self.mode == 'size':
                 if getsize.get_size(self.basket_path) >= int(self.size):
                     for obj in os.listdir(self.basket_path):
@@ -31,6 +33,7 @@ class CheckBasket(object):
                         else:
                             shutil.rmtree(os.path.join(self.basket_path, obj))
                             basket_list.remove(basket_list.search(obj, self.basket_path))
+
             elif self.mode == 'time':
                 for obj in os.listdir(self.basket_path):
                     if os.path.isfile(os.path.join(self.basket_path, obj)):
@@ -39,6 +42,7 @@ class CheckBasket(object):
                     else:
                         self.check_dir(os.path.join(self.basket_path, obj), self.time,
                                        basket_list, self.basket_path)
+
         else:
             self.logger.log("Basket doesn't exist", logging.ERROR)
         basket_list.save()
@@ -52,6 +56,7 @@ class CheckBasket(object):
             os.remove(path)
             self.logger.log("Remove file {}".format(os.path.basename(path)), logging.INFO)
             basket_list.remove(basket_list.search(os.path.basename(path), basket_path))
+
     def check_dir(self, path, time, basket_list, basket_path):
         dir_time = basket_list.search(os.path.basename(path), os.path.dirname(path)).time
         if (datetime.datetime.now()-dir_time).seconds >= int(time):

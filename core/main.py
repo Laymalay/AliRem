@@ -45,6 +45,7 @@ def activate_mode(config, cmd):
             cmd[k] = config.get(k)
         if v is False:
             cmd[k] = config.get(k)
+
 def alirem():
 
     args = createParser()
@@ -64,7 +65,7 @@ def alirem():
         try:
             handler.run(args.path)
         except ar.MyException:
-            print("ouuups")
+            print("MyExeption")
     elif args.command == "restore":
         rs.restore(args.name, args.basket_path, args.force, logger)
     else:

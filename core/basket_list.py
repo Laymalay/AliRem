@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
 import pickle
 import os
 import datetime
@@ -12,9 +14,11 @@ class element(object):
         self.name = name
         self.time = time
 
-class Basket_list(object):
+class BasketList(object):
+
     def __init__(self):
         self.array = []
+
     def search(self, name, basket_path):
         for el in self.array:
             if (os.path.basename(el.index_in_basket) == name) and (
@@ -24,9 +28,11 @@ class Basket_list(object):
 
     def remove(self, el):
         self.array.remove(el)
+
     def add(self, name, rm_path, basket_path, index_in_basket, time):
         el = element(name, rm_path, basket_path, index_in_basket, time)
         self.array.append(el)
+
     def load(self):
         with open('basket_list.pickle', 'rb') as f:
             if os.path.getsize('basket_list.pickle') > 0:
@@ -36,19 +42,23 @@ class Basket_list(object):
             for el in self.array:
                 if not os.path.exists(el.index_in_basket):
                     self.array.remove(el)
+
     def save(self):
         with open('basket_list.pickle', 'wb') as f:
             pickle.dump(self.array, f)
+
     def show(self):
         if len(self.array) > 10:
             size = 0
             for el in self.array:
                 size += getsize.get_size(el.index_in_basket)
             print 'TOTAL SIZE:'+ str(size)
+
         else:
             if self.array == []:
                 print 'EMPTY'
             print '\n'
+
             for el in self.array:
                 print 'NAME: '+el.name
                 print 'RM_PATH: '+el.rm_path
@@ -58,4 +68,5 @@ class Basket_list(object):
                 print 'TIME IN BASKET(seconds): '+str((datetime.datetime.now()-el.time).seconds)
                 print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
                 print '====================================='
+
         print '\n'

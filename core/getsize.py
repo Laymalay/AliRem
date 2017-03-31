@@ -1,4 +1,7 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
 import os
+
 def get_dir_size(directory):
     total_size = 0
     for item in os.listdir(directory):
