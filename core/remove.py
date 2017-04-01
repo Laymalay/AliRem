@@ -19,8 +19,11 @@ class HandlerRemove(object):
 
     def run(self, path):
         if self.is_basket:
-            b.go_basket(self.basket_path, path, self.is_dir, self.is_recursive, self.logger)
-        self.remove(path)
+            if b.go_basket(self.basket_path, path,
+                           self.is_dir, self.is_recursive, self.logger) is True:
+                self.remove(path)
+        else:
+            self.remove(path)
 
     def remove(self, path):
         if os.path.isfile(path):
@@ -28,7 +31,6 @@ class HandlerRemove(object):
             self.logger.log("File {} deleted".format(os.path.basename(path)), logging.INFO)
         elif os.path.isdir(path):
             self.remove_dir(path)
-            self.logger.log("Directory {} deleted".format(os.path.basename(path)), logging.INFO)
 
     def remove_dir(self, path):
         if not self.is_dir and not self.is_recursive:
@@ -48,9 +50,9 @@ class HandlerRemove(object):
                 except OSError:
                     self.logger.log("OSError", logging.ERROR)
                     b = False
-                except MyException:
-                    self.logger.log("MyException", logging.ERROR)
-                    b = False
+                # except MyException:
+                #     self.logger.log("MyException", logging.ERROR)
+                #     b = False
             if b:
                 os.rmdir(path)
                 self.logger.log("Directory {} deleted".format(os.path.basename(path)),
