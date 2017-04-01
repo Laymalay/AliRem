@@ -33,13 +33,27 @@ class Logger(object):
         formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
         fh.setFormatter(formatter)
 
+        jfh = logging.FileHandler(path+'.json')
+        jfh.setLevel(mode_for_file)
+        formatter_json = logging.Formatter((
+            ',\n'
+            '{\n'
+            '"asctime": "%(asctime)s",\n'
+            '"name":"%(name)s",\n'
+            '"levelname": "%(levelname)s",\n'
+            '"message":  "%(message)s"\n'
+            '}'))
+        jfh.setFormatter(formatter_json)
+
         if not is_silent:
             ch = logging.StreamHandler()
             ch.setLevel(mode_for_cmd)
             ch.setFormatter(formatter)
             logger.addHandler(ch)
+        logger.addHandler(jfh)
         logger.addHandler(fh)
         return logger
 
     def log(self, msg, level):
         self.logger.log(level, msg)
+

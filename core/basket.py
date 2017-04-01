@@ -24,7 +24,7 @@ def go_basket(basket_path, path, is_dir, is_recursive, logger):
             return True
         except IOError:
             logger.log("IOError: permission denied: '{}'".format(os.path.basename(path)),
-                       logging.WARNING)
+                       logging.ERROR)
             return False
     if os.path.isdir(path):
         dir_path = os.path.join(basket_path, os.path.basename(path))
@@ -40,7 +40,7 @@ def go_basket(basket_path, path, is_dir, is_recursive, logger):
             return True
         except OSError:
             logger.log("OSError: permission denied: '{}'".format(os.path.basename(path)),
-                       logging.WARNING)
+                       logging.ERROR)
             return False
 
 
