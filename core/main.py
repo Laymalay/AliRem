@@ -13,70 +13,83 @@ def createParser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
 
-    # TODO: Change path for log file, cause class logger will add .log or .json later + config file
-    parser.add_argument('--configfile', action='store', default='config_file.json')
-    parser.add_argument('-c', '--logmodecmd', action='store',
+    parser.add_argument('--configfile', action='store')
+    parser.add_argument('--logfilepath', action='store')
+    parser.add_argument('--silent', action='store_true', default=None)
+    parser.add_argument('--logmodecmd', action='store',
                         choices=['info', 'debug', 'warning', 'error'])
-    parser.add_argument('-f', '--logmodefile', action='store',
+    parser.add_argument('--logmodefile', action='store',
                         choices=['info', 'debug', 'warning', 'error'])
-    parser.add_argument('-p', '--logfilepath', action='store')
-    parser.add_argument('--silent', action='store_true')
 
     clearParser = subparsers.add_parser('clear')
-    clearParser.add_argument('-m', '--clearmode', action='store')
+    clearParser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'])
     clearParser.add_argument('-t', '--deltatime', action='store', type=int)
     clearParser.add_argument('-s', '--maxsize', action='store', type=int)
     clearParser.add_argument('-p', '--basketpath', action='store')
-    clearParser.add_argument('-l', '--show', action='store_true')
+    clearParser.add_argument('-l', '--show', action='store_true', default=None)
 
     removeParser = subparsers.add_parser('remove')
     removeParser.add_argument('path', nargs='+')
     removeParser.add_argument('-d', '--dir', action='store_true')
     removeParser.add_argument('-r', '--recursive', action='store_true')
-    removeParser.add_argument('-b', '--basket', action='store_true')
+    removeParser.add_argument('-b', '--basket', action='store_true', default=None)
     removeParser.add_argument('-p', '--basketpath', action='store')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('name', nargs='+')
     restoreParser.add_argument('-p', '--basketpath', action='store')
-    restoreParser.add_argument('-f', '--force', action='store_true')
+    restoreParser.add_argument('-f', '--force', action='store_true', default=None)
     namespace = parser.parse_args() #(sys.args[1:])
     return namespace
 
-def activate_mode(config, cmd):
-#TODO:swap congig and cmd and use later only congig[param] or config.get("param")
-    for k, v in cmd.iteritems():
-        if v is None:
-            cmd[k] = config.get(k)
-        if not v:
-            cmd[k] = config.get(k)
+def sync_params(cmd, default_config, config=None):
+    if config is not None:
+        #Overlap default_config by config
+        for key, value in default_config.iteritems():
+            if value != config.get(key) and config.get(key) is not None:
+                default_config[key] = config.get(key)
+    for key, value in default_config.iteritems():
+        if value != cmd.get(key) and cmd.get(key) is not None:
+            default_config[key] = cmd.get(key)
 
 def alirem():
 
     args = createParser()
-    with open(args.configfile) as config_file:
-        config = json.load(config_file)
+    config = None
+    if args.configfile is not None:
+        with open(args.configfile) as config_file:
+            config = json.load(config_file)
 
-    activate_mode(config, vars(args))
-    logger = log.Logger(args.logmodefile, args.logmodecmd, args.logfilepath, args.silent)
+    with open('config_file_default.json') as default_config_file:
+        default_config = json.load(default_config_file)
+
+    sync_params(vars(args), default_config, config)
+
+    for key, value in default_config.iteritems():
+        print key+':'+str(value)
+
+    logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
+                        default_config['logfilepath'], default_config['silent'])
 
     if args.command == "clear":
-        check_basket_for_cleaning = CheckBasketForCleaning.CheckBasketHandler(logger, args.show,
-                                                                              args.basketpath,
-                                                                              args.clearmode,
-                                                                              args.deltatime,
-                                                                              args.maxsize)
-        check_basket_for_cleaning.check_basket_for_cleaning()
+        check_basket = CheckBasketForCleaning.CheckBasketHandler(logger,
+                                                                 default_config['show'],
+                                                                 default_config['basketpath'],
+                                                                 default_config['clearmode'],
+                                                                 default_config['deltatime'],
+                                                                 default_config['maxsize'])
+        check_basket.check_basket_for_cleaning()
     elif args.command == "remove":
         remove_handler = remover.RemoveHandler(args.dir, args.recursive,
-                                               args.basket, args.basketpath, logger)
+                                               default_config['basket'],
+                                               default_config['basketpath'], logger)
         try:
             for path in args.path:
                 remove_handler.run_remove(path)
         except remover.MyException:
             logger.log("MyException", logging.ERROR)
     elif args.command == "restore":
-        restorer.restore(args.name, args.basketpath, args.force, logger)
+        restorer.restore(args.name, default_config['basketpath'], default_config['force'], logger)
     else:
         logger.log("Invalid operation", logging.ERROR)
 

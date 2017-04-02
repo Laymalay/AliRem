@@ -36,9 +36,9 @@ def move_to_basket(basket_path, path, is_dir, is_recursive, logger):
                 shutil.copytree(path, dir_path)
                 basket_list.add(basename(path), path, basket_path,
                                 dir_path, datetime.datetime.now())
-            basket_list.save()
-            logger.log("Moved directory {} to the basket".format(basename(path)),
-                       logging.INFO)
+                basket_list.save()
+                logger.log("Moved directory {} to the basket".format(basename(path)),
+                           logging.INFO)
             return True
         except OSError:
             logger.log("OSError: permission denied: '{}'".format(basename(path)),
