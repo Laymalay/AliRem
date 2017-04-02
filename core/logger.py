@@ -6,9 +6,10 @@ import logging.config
 
 class Logger(object):
     def __init__(self, mode_for_file, mode_for_cmd, path, is_silent):
-        self.logger = self.setup(mode_for_file, mode_for_cmd, path, is_silent)
+        self.is_silent = is_silent
+        self.logger = self.setup(mode_for_file, mode_for_cmd, path)
 
-    def Parser_mode(self, mode):
+    def parser_mode(self, mode):
         if mode.upper() == 'INFO':
             return logging.INFO
 
@@ -21,39 +22,44 @@ class Logger(object):
         if mode.upper() == 'ERROR':
             return logging.ERROR
 
-    def setup(self, mode_for_file, mode_for_cmd, path, is_silent):
-        mode_for_file = self.Parser_mode(mode_for_file)
-        mode_for_cmd = self.Parser_mode(mode_for_cmd)
+    def setup(self, mode_for_file, mode_for_cmd, path):
+        mode_for_file_parsed = self.parser_mode(mode_for_file)
+        mode_for_cmd_parsed = self.parser_mode(mode_for_cmd)
 
         logger = logging.getLogger('alirem')
         logger.setLevel(logging.DEBUG)
 
-        fh = logging.FileHandler(path)
-        fh.setLevel(mode_for_file)
+        filehandler = logging.FileHandler(path+'.log')
+        filehandler.setLevel(mode_for_file_parsed)
         formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-        fh.setFormatter(formatter)
+        filehandler.setFormatter(formatter)
 
-        jfh = logging.FileHandler(path+'.json')
-        jfh.setLevel(mode_for_file)
+        jsonfilehandler = logging.FileHandler(path+'.json')
+        jsonfilehandler.setLevel(mode_for_file_parsed)
         formatter_json = logging.Formatter((
             ',\n'
             '{\n'
-            '"asctime": "%(asctime)s",\n'
-            '"name":"%(name)s",\n'
-            '"levelname": "%(levelname)s",\n'
-            '"message":  "%(message)s"\n'
+            '   "asctime": "%(asctime)s",\n'
+            '   "name":"%(name)s",\n'
+            '   "levelname": "%(levelname)s",\n'
+            '   "message":  "%(message)s"\n'
             '}'))
-        jfh.setFormatter(formatter_json)
+        jsonfilehandler.setFormatter(formatter_json)
 
-        if not is_silent:
-            ch = logging.StreamHandler()
-            ch.setLevel(mode_for_cmd)
-            ch.setFormatter(formatter)
-            logger.addHandler(ch)
-        logger.addHandler(jfh)
-        logger.addHandler(fh)
+        if not self.is_silent:
+            consolehandler = logging.StreamHandler()
+            consolehandler.setLevel(mode_for_cmd_parsed)
+            consolehandler.setFormatter(formatter)
+            logger.addHandler(consolehandler)
+        logger.addHandler(jsonfilehandler)
+        logger.addHandler(filehandler)
         return logger
 
-    def log(self, msg, level):
+    def log(self, msg, level, exit_code=None):
         self.logger.log(level, msg)
+
+        if exit_code is not None and self.is_silent:
+            pass
+            #exit(exit_code) 
+        # TODO:exit(0) for silent mode
 

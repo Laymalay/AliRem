@@ -2,11 +2,12 @@
 # -*- coding: UTF-8 -*-
 import pickle
 import os
+from os.path import exists, basename
 import datetime
-import core.getsize as getsize
+import alirem.core.getsize as getsize
 
 
-class element(object):
+class Element(object):
     def __init__(self, name, rm_path, basket_path, index_in_basket, time):
         self.rm_path = rm_path
         self.basket_path = basket_path
@@ -21,16 +22,16 @@ class BasketList(object):
 
     def search(self, name, basket_path):
         for el in self.array:
-            if (os.path.basename(el.index_in_basket) == name) and (
-                    el.basket_path == os.path.basename(basket_path)):
+            if (basename(el.index_in_basket) == name) and (
+                    el.basket_path == basename(basket_path)):
                 return el
         return None
 
     def remove(self, el):
         self.array.remove(el)
-
+#TODO: is it necessary to call func like add_element?
     def add(self, name, rm_path, basket_path, index_in_basket, time):
-        el = element(name, rm_path, basket_path, index_in_basket, time)
+        el = Element(name, rm_path, basket_path, index_in_basket, time)
         self.array.append(el)
 
     def load(self):
@@ -40,7 +41,7 @@ class BasketList(object):
             else:
                 self.array = []
             for el in self.array:
-                if not os.path.exists(el.index_in_basket):
+                if not exists(el.index_in_basket):
                     self.array.remove(el)
 
     def save(self):

@@ -1,11 +1,11 @@
 {
     "clearmode":"size",
     "deltatime": 120,
-    "size":100,
-    "basket_path":"basket",
+    "maxsize":100,
+    "basketpath":"basket",
     "basket":true,
     "force":true,
-    "logmode_cmd":"INFO",
-    "logmode_file":"info",
-    "log_file_path":"alirem.log"
+    "logmodecmd":"INFO",
+    "logmodefile":"info",
+    "logfilepath":"alirem"
 }
