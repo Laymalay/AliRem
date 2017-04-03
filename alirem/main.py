@@ -97,14 +97,14 @@ def alirem():
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
         except remover.MyException:
-            logger.log("MyException", logging.ERROR)
+            logger.log("MyException", logging.ERROR, 1)
 
     elif args.command == "restore":
         for restore_name in args.restorename:
             restorer.restore(restore_name, default_config['basketpath'],
                              default_config['force'], logger)
     else:
-        logger.log("Invalid operation", logging.ERROR)
+        logger.log("Invalid operation", logging.ERROR, 1)
 
 if __name__ == '__main__':
     alirem()

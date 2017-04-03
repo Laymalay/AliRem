@@ -26,27 +26,27 @@ class RemoveHandler(object):
             else:
                 self.remove(path)
         else:
-            self.logger.log("Can not find such path", logging.ERROR)
+            self.logger.log("Can not find such path", logging.ERROR, 1)
 # TODO: add exit_code for each class in programm so that everyone can use this
 
     def remove(self, path):
         if os.path.isfile(path):
             os.remove(path)
-            self.logger.log("File {} deleted".format(os.path.basename(path)), logging.INFO)
+            self.logger.log("File {} deleted".format(os.path.basename(path)), logging.INFO, 0)
         elif os.path.isdir(path):
             self.remove_dir(path)
 
 
     def remove_dir(self, path):
         if not self.is_dir and not self.is_recursive:
-            self.logger.log("cannot remove '{}', it's dir".format(path), logging.WARNING)
+            self.logger.log("cannot remove '{}', it's dir".format(path), logging.WARNING, 1)
         elif self.is_dir:
             if len(os.listdir(path)) != 0:
-                self.logger.log("Directory {} not empty".format(path), logging.WARNING)
+                self.logger.log("Directory {} not empty".format(path), logging.WARNING, 1)
             else:
                 os.rmdir(path)
                 self.logger.log("Directory {} deleted".format(os.path.basename(path)),
-                                logging.INFO)
+                                logging.INFO, 0)
         elif self.is_recursive:
             b = True
             for obj in os.listdir(path):
@@ -61,6 +61,6 @@ class RemoveHandler(object):
             if b:
                 os.rmdir(path)
                 self.logger.log("Directory {} deleted".format(os.path.basename(path)),
-                                logging.INFO)
+                                logging.INFO, 0)
             else:
                 raise MyException()

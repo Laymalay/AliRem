@@ -48,18 +48,20 @@ class Logger(object):
 
         mode_for_cmd_parsed = self.parser_mode(mode_for_cmd)
 
-        if not self.is_silent:
-            consolehandler = logging.StreamHandler()
-            consolehandler.setLevel(mode_for_cmd_parsed)
-            consolehandler.setFormatter(formatter)
-            logger.addHandler(consolehandler)
+
+        consolehandler = logging.StreamHandler()
+        consolehandler.setLevel(mode_for_cmd_parsed)
+        consolehandler.setFormatter(formatter)
+        logger.addHandler(consolehandler)
 
         return logger
 
     def log(self, msg, level, exit_code=None):
-        self.logger.log(level, msg)
+        if not self.is_silent:
+            self.logger.log(level, msg)
 
         if exit_code is not None and level == logging.ERROR:
-            exit(exit_code) 
-        # TODO:exit(0) for silent mode
+            exit(exit_code)
+
+
 
