@@ -26,6 +26,7 @@ class Logger(object):
         logger = logging.getLogger('alirem')
         logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+
         if mode_for_file is not None:
             mode_for_file_parsed = self.parser_mode(mode_for_file)
             filehandler = logging.FileHandler(path+'.log')

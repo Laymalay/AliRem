@@ -3,7 +3,8 @@
 #python -m unittest test
 import unittest
 import subprocess
-from os.path import join, exists, mkdir, makedirs
+from os.path import join, exists
+from os import mkdir, makedirs
 from alirem.core.remove import RemoveHandler
 import alirem.core.logger as log
 

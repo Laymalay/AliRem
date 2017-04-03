@@ -29,14 +29,14 @@ def createParser():
     clearParser.add_argument('-l', '--show', action='store_true', default=None)
 
     removeParser = subparsers.add_parser('remove')
-    removeParser.add_argument('path', nargs='+')
+    removeParser.add_argument('removepath', nargs='+')
     removeParser.add_argument('-d', '--dir', action='store_true')
     removeParser.add_argument('-r', '--recursive', action='store_true')
     removeParser.add_argument('-b', '--basket', action='store_true', default=None)
     removeParser.add_argument('-p', '--basketpath', action='store')
 
     restoreParser = subparsers.add_parser('restore')
-    restoreParser.add_argument('name', nargs='+')
+    restoreParser.add_argument('restorename', nargs='+')
     restoreParser.add_argument('-p', '--basketpath', action='store')
     restoreParser.add_argument('-f', '--force', action='store_true', default=None)
     namespace = parser.parse_args() #(sys.args[1:])
@@ -84,12 +84,15 @@ def alirem():
                                                default_config['basket'],
                                                default_config['basketpath'], logger)
         try:
-            for path in args.path:
-                remove_handler.run_remove(path)
+            for remove_path in args.removepath:
+                remove_handler.run_remove(remove_path)
         except remover.MyException:
             logger.log("MyException", logging.ERROR)
+
     elif args.command == "restore":
-        restorer.restore(args.name, default_config['basketpath'], default_config['force'], logger)
+        for restore_name in args.restorename:
+            restorer.restore(restore_name, default_config['basketpath'],
+                             default_config['force'], logger)
     else:
         logger.log("Invalid operation", logging.ERROR)
 
