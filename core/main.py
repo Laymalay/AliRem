@@ -19,7 +19,7 @@ def createParser():
     parser.add_argument('--logmodecmd', action='store',
                         choices=['info', 'debug', 'warning', 'error'])
     parser.add_argument('--logmodefile', action='store',
-                        choices=['info', 'debug', 'warning', 'error'])
+                        choices=['info', 'debug', 'warning', 'error'], default=None)
 
     clearParser = subparsers.add_parser('clear')
     clearParser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'])

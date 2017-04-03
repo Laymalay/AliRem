@@ -6,7 +6,7 @@
     "basket":true,
     "force":true,
     "logmodecmd":"INFO",
-    "logmodefile":"info",
+    "logmodefile":null,
     "logfilepath":"alirem",
     "silent":false,
     "show":true

@@ -7,7 +7,7 @@ import logging.config
 class Logger(object):
     def __init__(self, mode_for_file, mode_for_cmd, path, is_silent):
         self.is_silent = is_silent
-        self.logger = self.setup(mode_for_file, mode_for_cmd, path)
+        self.logger = self.setup(mode_for_cmd, path, mode_for_file)
 
     def parser_mode(self, mode):
         if mode.upper() == 'INFO':
@@ -22,37 +22,37 @@ class Logger(object):
         if mode.upper() == 'ERROR':
             return logging.ERROR
 
-    def setup(self, mode_for_file, mode_for_cmd, path):
-        mode_for_file_parsed = self.parser_mode(mode_for_file)
-        mode_for_cmd_parsed = self.parser_mode(mode_for_cmd)
-
+    def setup(self, mode_for_cmd, path, mode_for_file=None,):
         logger = logging.getLogger('alirem')
         logger.setLevel(logging.DEBUG)
-
-        filehandler = logging.FileHandler(path+'.log')
-        filehandler.setLevel(mode_for_file_parsed)
         formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-        filehandler.setFormatter(formatter)
+        if mode_for_file is not None:
+            mode_for_file_parsed = self.parser_mode(mode_for_file)
+            filehandler = logging.FileHandler(path+'.log')
+            filehandler.setLevel(mode_for_file_parsed)
+            filehandler.setFormatter(formatter)
+            jsonfilehandler = logging.FileHandler(path+'.json')
+            jsonfilehandler.setLevel(mode_for_file_parsed)
+            formatter_json = logging.Formatter((
+                ',\n'
+                '{\n'
+                '   "asctime": "%(asctime)s",\n'
+                '   "name":"%(name)s",\n'
+                '   "levelname": "%(levelname)s",\n'
+                '   "message":  "%(message)s"\n'
+                '}'))
+            jsonfilehandler.setFormatter(formatter_json)
+            logger.addHandler(jsonfilehandler)
+            logger.addHandler(filehandler)
 
-        jsonfilehandler = logging.FileHandler(path+'.json')
-        jsonfilehandler.setLevel(mode_for_file_parsed)
-        formatter_json = logging.Formatter((
-            ',\n'
-            '{\n'
-            '   "asctime": "%(asctime)s",\n'
-            '   "name":"%(name)s",\n'
-            '   "levelname": "%(levelname)s",\n'
-            '   "message":  "%(message)s"\n'
-            '}'))
-        jsonfilehandler.setFormatter(formatter_json)
+        mode_for_cmd_parsed = self.parser_mode(mode_for_cmd)
 
         if not self.is_silent:
             consolehandler = logging.StreamHandler()
             consolehandler.setLevel(mode_for_cmd_parsed)
             consolehandler.setFormatter(formatter)
             logger.addHandler(consolehandler)
-        logger.addHandler(jsonfilehandler)
-        logger.addHandler(filehandler)
+
         return logger
 
     def log(self, msg, level, exit_code=None):
