@@ -4,7 +4,7 @@ import pickle
 import os
 from os.path import exists, basename
 import datetime
-import alirem.core.getsize as getsize
+import alirem.getsize as getsize
 
 
 class Element(object):

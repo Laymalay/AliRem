@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 import logging
 import os
-import alirem.core.basket as basket
+import alirem.basket as basket
 
 
 class MyException(Exception):

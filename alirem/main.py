@@ -3,41 +3,51 @@
 import json
 import argparse
 import logging
-import alirem.core.logger as log
-import alirem.core.remove as remover
-import alirem.core.restore as restorer
-import alirem.core.check_basket_for_cleaning as CheckBasketForCleaning
+import alirem.logger as log
+import alirem.remove as remover
+import alirem.restore as restorer
+import alirem.check_basket_for_cleaning as CheckBasketForCleaning
 
 
 def createParser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
 
-    parser.add_argument('--configfile', action='store')
-    parser.add_argument('--logfilepath', action='store')
-    parser.add_argument('--silent', action='store_true', default=None)
+    parser.add_argument('--configfile', action='store', help='path to config file')
+    parser.add_argument('--logfilepath', action='store',
+                        help='path to logging file without file extension')
+    parser.add_argument('--silent', action='store_true', default=None,
+                        help='silent mode')
     parser.add_argument('--logmodecmd', action='store',
-                        choices=['info', 'debug', 'warning', 'error'])
+                        choices=['info', 'debug', 'warning', 'error'],
+                        help='logging level for file')
     parser.add_argument('--logmodefile', action='store',
-                        choices=['info', 'debug', 'warning', 'error'], default=None)
+                        choices=['info', 'debug', 'warning', 'error'], default=None,
+                        help='logging level for cmd')
 
-    clearParser = subparsers.add_parser('clear')
-    clearParser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'])
-    clearParser.add_argument('-t', '--deltatime', action='store', type=int)
-    clearParser.add_argument('-s', '--maxsize', action='store', type=int)
-    clearParser.add_argument('-p', '--basketpath', action='store')
-    clearParser.add_argument('-l', '--show', action='store_true', default=None)
+    clearParser = subparsers.add_parser('basket')
+    clearParser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'],
+                             help='cleaning mode for basket')
+    clearParser.add_argument('-t', '--deltatime', action='store', type=int,
+                             help='file storage time in basket')
+    clearParser.add_argument('-x', '--maxsize', action='store', type=int,
+                             help='max size of basket')
+    clearParser.add_argument('-p', '--basketpath', action='store',
+                             help='path to basket')
+    clearParser.add_argument('-s', '--show', action='store_true', default=None,
+                             help='show the contents of the basket')
 
     removeParser = subparsers.add_parser('remove')
     removeParser.add_argument('removepath', nargs='+')
-    removeParser.add_argument('-d', '--dir', action='store_true')
-    removeParser.add_argument('-r', '--recursive', action='store_true')
-    removeParser.add_argument('-b', '--basket', action='store_true', default=None)
-    removeParser.add_argument('-p', '--basketpath', action='store')
+    removeParser.add_argument('-d', '--dir', action='store_true', help='is it dir')
+    removeParser.add_argument('-r', '--recursive', action='store_true', help='is it not empty dir')
+    removeParser.add_argument('-b', '--basket', action='store_true', default=None,
+                              help='remove to basket')
+    removeParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('restorename', nargs='+')
-    restoreParser.add_argument('-p', '--basketpath', action='store')
+    restoreParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
     restoreParser.add_argument('-f', '--force', action='store_true', default=None)
     namespace = parser.parse_args() #(sys.args[1:])
     return namespace
@@ -71,7 +81,7 @@ def alirem():
     logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
                         default_config['logfilepath'], default_config['silent'])
 
-    if args.command == "clear":
+    if args.command == "basket":
         check_basket = CheckBasketForCleaning.CheckBasketHandler(logger,
                                                                  default_config['show'],
                                                                  default_config['basketpath'],

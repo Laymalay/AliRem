@@ -59,8 +59,7 @@ class Logger(object):
     def log(self, msg, level, exit_code=None):
         self.logger.log(level, msg)
 
-        if exit_code is not None and self.is_silent:
-            pass
-            #exit(exit_code) 
+        if exit_code is not None and level == logging.ERROR:
+            exit(exit_code) 
         # TODO:exit(0) for silent mode
 

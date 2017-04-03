@@ -4,11 +4,11 @@ from os.path import join, exists, isfile, basename, isdir
 from os import remove
 import logging
 import shutil
-import alirem.core.basket_list as basketlist
+import alirem.basket_list as basketlist
 
 
 def restore(name_el, basket_path, is_force, logger):
-    
+
     basket_list = basketlist.BasketList()
     basket_list.load()
     index_name = join(basket_path, name_el)

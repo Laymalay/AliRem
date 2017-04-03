@@ -11,7 +11,7 @@ setup(
 
     entry_points={
         'console_scripts':
-            ['alirem =core.main:alirem']
+            ['alirem =alirem.main:alirem']
         }
 
 )

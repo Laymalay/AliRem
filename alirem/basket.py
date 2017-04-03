@@ -5,7 +5,7 @@ from os import listdir, mkdir
 from os.path import join, exists, isfile, basename, isdir
 import logging
 import datetime
-import alirem.core.basket_list as basketlist
+import alirem.basket_list as basketlist
 
 def move_to_basket(basket_path, path, is_dir, is_recursive, logger):
     basket_list = basketlist.BasketList()
