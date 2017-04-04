@@ -20,7 +20,7 @@ class RemoveHandler(object):
         self.logger = logger
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
-
+        self.file_removed = True
 
     def remove_empty_dir(self, path):
         if not self.is_dryrun:
@@ -83,11 +83,12 @@ class RemoveHandler(object):
                                     logging.INFO, 0)
         elif self.is_recursive:
             b = True
-            file_removed = True
+
             for obj in os.listdir(path):
                 try:
                     if not self.remove(path + "/" + obj):
-                        file_removed = False
+                        self.file_removed = False
+
                 except OSError:
                     # self.logger.log("OSError", logging.ERROR)
                     b = False
@@ -95,12 +96,14 @@ class RemoveHandler(object):
                     # self.logger.log("MyException", logging.ERROR)
                     b = False
             if b:
-                if file_removed:
+                if self.file_removed:
                 # if len(os.listdir(path)) == 0 or self.is_dryrun:
                     if self.asking('''Do you want to delete this empty directory:
                                     {}?'''.format(os.path.basename(path))):
                         self.remove_empty_dir(path)
                         self.logger.log("Directory {} deleted".format(os.path.basename(path)),
                                         logging.INFO, 0)
+                    else:
+                        self.file_removed = False
             else:
                 raise MyException()
