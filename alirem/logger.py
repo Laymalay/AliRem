@@ -22,7 +22,7 @@ class Logger(object):
         if mode.upper() == 'ERROR':
             return logging.ERROR
 
-    def setup(self, mode_for_cmd, path, mode_for_file=None,):
+    def setup(self, mode_for_cmd, path, mode_for_file=None):
         logger = logging.getLogger('alirem')
         logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')

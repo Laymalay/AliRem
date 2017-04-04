@@ -12,6 +12,7 @@ import alirem.check_basket_for_cleaning as CheckBasketForCleaning
 def createParser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
+    parser.add_argument('--showparam', action='store_true')
     parser.add_argument('--dryrun', action='store_true', default=None)
     parser.add_argument('-i', '--interactive', action='store_true', default=None)
     parser.add_argument('--configfile', action='store', help='path to config file')
@@ -76,8 +77,9 @@ def alirem():
 
     sync_params(vars(args), default_config, config)
 
-    for key, value in default_config.iteritems():
-        print key+':'+str(value)
+    if args.showparam:
+        for key, value in default_config.iteritems():
+            print key+':'+str(value)
 
     logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
                         default_config['logfilepath'], default_config['silent'])
@@ -95,7 +97,7 @@ def alirem():
                                                default_config['interactive'],
                                                default_config['dryrun'],
                                                default_config['basket'],
-                                               default_config['basketpath'], logger)
+                                               logger, default_config['basketpath'])
         try:
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
