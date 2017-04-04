@@ -9,5 +9,7 @@
     "logmodefile":null,
     "logfilepath":"alirem",
     "silent":false,
-    "show":true
+    "show":true,
+    "dryrun":false,
+    "interactive":false
 }

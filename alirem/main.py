@@ -12,7 +12,8 @@ import alirem.check_basket_for_cleaning as CheckBasketForCleaning
 def createParser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
-
+    parser.add_argument('--dryrun', action='store_true', default=None)
+    parser.add_argument('-i', '--interactive', action='store_true', default=None)
     parser.add_argument('--configfile', action='store', help='path to config file')
     parser.add_argument('--logfilepath', action='store',
                         help='path to logging file without file extension')
@@ -91,13 +92,15 @@ def alirem():
         check_basket.check_basket_for_cleaning()
     elif args.command == "remove":
         remove_handler = remover.RemoveHandler(args.dir, args.recursive,
+                                               default_config['interactive'],
+                                               default_config['dryrun'],
                                                default_config['basket'],
                                                default_config['basketpath'], logger)
         try:
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
         except remover.MyException:
-            logger.log("MyException", logging.ERROR, 1)
+            logger.log("Unable to delete data", logging.ERROR, 1)
 
     elif args.command == "restore":
         for restore_name in args.restorename:

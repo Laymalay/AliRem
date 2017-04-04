@@ -7,7 +7,32 @@ import logging
 import datetime
 import alirem.basket_list as basketlist
 
-def move_to_basket(basket_path, path, is_dir, is_recursive, logger):
+
+def asking(msg, is_interactive):
+    if is_interactive:
+        print msg+'\n'
+        answer = raw_input('[Y/n]\n')
+        if answer != "n":
+            return True
+        else:
+            return False
+    else:
+        return True
+
+def copy_file(path, dst, is_dryrun, basket_list, basket_path):
+    if not is_dryrun:
+        shutil.copyfile(path, dst)
+        basket_list.add(basename(path), path, basket_path, dst, datetime.datetime.now())
+        basket_list.save()
+
+def copy_dir(path, dst, is_dryrun, basket_list, basket_path):
+    if not is_dryrun:
+        shutil.copytree(path, dst)
+        basket_list.add(basename(path), path, basket_path,
+                        dst, datetime.datetime.now())
+        basket_list.save()
+
+def move_to_basket(basket_path, path, is_dir, is_recursive, logger, is_dryrun, is_interactive):
     basket_list = basketlist.BasketList()
     basket_list.load()
 
@@ -16,30 +41,34 @@ def move_to_basket(basket_path, path, is_dir, is_recursive, logger):
         logger.log("Basket was created", logging.INFO)
     if isfile(path):
         try:
-            file_path = join(basket_path, basename(path))
-            file_path = check_in_basket(basket_path, file_path)
-            shutil.copyfile(path, file_path)
-            basket_list.add(basename(path), path, basket_path, file_path, datetime.datetime.now())
-            basket_list.save()
-            logger.log("Moved file {} to the basket".format(basename(path)), logging.INFO)
-            return True
+            dst = join(basket_path, basename(path))
+            dst = check_in_basket(basket_path, dst)
+            if asking('\nDo u want to move this file: {} to basket?'.format(basename(path)),
+                      is_interactive):
+                copy_file(path, dst, is_dryrun, basket_list, basket_path)
+                logger.log("Moved file {} to the basket".format(basename(path)), logging.INFO)
+                return True
+            else:
+                return False
         except IOError:
             logger.log("IOError: permission denied: '{}'".format(basename(path)),
                        logging.ERROR)
             return False
+
     if isdir(path):
-        dir_path = join(basket_path, basename(path))
-        dir_path = check_in_basket(basket_path, dir_path)
+        dst = join(basket_path, basename(path))
+        dst = check_in_basket(basket_path, dst)
         try:
             if (len(listdir(path)) != 0 and is_recursive#check correct flags
                     and not is_dir) or (len(listdir(path)) == 0 and is_dir):
-                shutil.copytree(path, dir_path)
-                basket_list.add(basename(path), path, basket_path,
-                                dir_path, datetime.datetime.now())
-                basket_list.save()
-                logger.log("Moved directory {} to the basket".format(basename(path)),
-                           logging.INFO)
-            return True
+                if asking('Do u want to move this directory: {} to basket?'.format(basename(path)),
+                          is_interactive):
+                    copy_dir(path, dst, is_dryrun, basket_list, basket_path)
+                    logger.log("Moved directory {} to the basket".format(basename(path)),
+                               logging.INFO)
+                    return True
+                else:
+                    return False
         except OSError:
             logger.log("OSError: permission denied: '{}'".format(basename(path)),
                        logging.ERROR)
