@@ -3,7 +3,7 @@
 import shutil
 import os
 from os import listdir, mkdir, access, makedirs
-from os.path import join, exists, isfile, basename, isdir
+from os.path import join, exists, isfile, basename, isdir, dirname
 import logging
 import datetime
 import alirem.basket_list as basketlist
@@ -22,8 +22,6 @@ class BasketHandler(object):
         self.is_dryrun = is_dryrun
         self.file_copied = True
         self.is_force = is_force
-        self.basket_list = basketlist.BasketList()
-        self.basket_list.load()
 
     def run(self):
 
@@ -31,31 +29,42 @@ class BasketHandler(object):
             mkdir(self.basket_path)
             self.logger.log("Basket was created", logging.INFO)
         if self.check_flags():
+            basket_list = basketlist.BasketList()
+            basket_list.load()
 
-            self.copy(self.path, self.basket_path)
-            self.basket_list.add(basename(self.path), self.path,
-                                 self.basket_path, join(self.basket_path, self.path),
-                                 datetime.datetime.now())
-            self.basket_list.save()
+            new_name = self.check_in_basket(self.path, self.basket_path)
 
+            dst = join(self.basket_path, new_name)
+            self.copy(self.path, dst)
+
+            basket_list.add(new_name,
+                            self.path,
+                            self.basket_path, join(self.basket_path, new_name),
+                            datetime.datetime.now())
+            basket_list.save()
+
+    # dst = basket/dir
     def copy(self, path, dst):
+
         if isfile(path):
             if self.copy_file(path, dst):
                 return True
             else:
                 return False
         if isdir(path):
+
             if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
                 self.copy_dir(path, dst)
                 return True
             else:
                 return False
 
+
+
     def copy_dir(self, path, dst):
         for obj in listdir(path):
-            if not self.copy(join(path, obj), join(dst, basename(path))):
+            if not self.copy(join(path, obj), join(dst, obj)):
                 self.file_copied = False
-
         if self.file_copied:
             self.logger.log("Directory {} copied".format(os.path.basename(path)),
                             logging.INFO)
@@ -81,10 +90,11 @@ class BasketHandler(object):
     def check_access_and_copy_file(self, path, dst):
         if access(path, os.R_OK):
             if not self.is_dryrun:
-                if not exists(dst):
-                    makedirs(dst)
-                newdst = join(dst, basename(path))
-                shutil.copyfile(path, newdst)
+                if not exists(dirname(dst)):
+                    makedirs(dirname(dst))
+                # new_name = self.check_in_basket(path, dst)
+                # newdst = join(dst, basename(new_name))
+                shutil.copyfile(path, dst)
                 return True
         else:
             return False
@@ -102,8 +112,8 @@ class BasketHandler(object):
         else:
             return True
 
-    def check_in_basket(self, path):
-        path_check = join(self.basket_path, basename(path))
+    def check_in_basket(self, path, dst):
+        path_check = join(dst, basename(path))
 
         if exists(path_check):
             index = 1
