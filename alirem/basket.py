@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 import shutil
 import os
-from os import listdir, mkdir, access
+from os import listdir, mkdir, access, makedirs
 from os.path import join, exists, isfile, basename, isdir
 import logging
 import datetime
@@ -31,8 +31,12 @@ class BasketHandler(object):
             mkdir(self.basket_path)
             self.logger.log("Basket was created", logging.INFO)
         if self.check_flags():
-            self.copy(self.path, self.basket_path)
 
+            self.copy(self.path, self.basket_path)
+            self.basket_list.add(basename(self.path), self.path,
+                                 self.basket_path, join(self.basket_path, self.path),
+                                 datetime.datetime.now())
+            self.basket_list.save()
 
     def copy(self, path, dst):
         if isfile(path):
@@ -49,40 +53,20 @@ class BasketHandler(object):
 
     def copy_dir(self, path, dst):
         for obj in listdir(path):
-            new_dst = join(dst, path)
-            if not self.copy(join(path, obj), new_dst):
+            if not self.copy(join(path, obj), join(dst, basename(path))):
                 self.file_copied = False
 
         if self.file_copied:
-            if self.asking('''Do you want to move this directory to basket:
-                            {}?'''.format(os.path.basename(path))):
-                self.copy_empty_dir(path, dst)
-                self.logger.log("Directory {} copied".format(os.path.basename(path)),
-                                logging.INFO)
-            else:
-                self.file_copied = False
-
+            self.logger.log("Directory {} copied".format(os.path.basename(path)),
+                            logging.INFO)
         else:
             if not self.is_force:
                 self.logger.log("Permission Denied ",
                                 logging.ERROR, exception.PermissionDenied)
 
-    def copy_empty_dir(self, path, dst):
-        # dst = join(self.basket_path, basename(path))
-        # dst = self.check_in_basket(dst)
-        if self.asking('Do u want to move this directory: {} to basket?'.format(basename(path))):
-            self.check_access_and_copy_dir(path, dst)
-            self.logger.log("Moved directory {} to the basket".format(basename(path)),
-                            logging.INFO)
-
-            return True
-        else:
-            return False
 
 
     def copy_file(self, path, dst):
-        # dst = join(self.basket_path, basename(path))
-        # dst = self.check_in_basket(dst)
         if self.asking('\nDo u want to move this file: {} to basket?'.format(basename(path))):
             if self.check_access_and_copy_file(path, dst):
                 self.logger.log("Moved file {} to the basket".format(basename(path)), logging.INFO)
@@ -93,32 +77,17 @@ class BasketHandler(object):
         else:
             return False
 
+
     def check_access_and_copy_file(self, path, dst):
         if access(path, os.R_OK):
             if not self.is_dryrun:
-                
-                shutil.copyfile(path, os.path.dirname(dst))
-                self.basket_list.add(basename(path), path,
-                                     self.basket_path, dst, datetime.datetime.now())
-                self.basket_list.save()
+                if not exists(dst):
+                    makedirs(dst)
+                newdst = join(dst, basename(path))
+                shutil.copyfile(path, newdst)
                 return True
         else:
             return False
-
-    def check_access_and_copy_dir(self, path, dst):
-        if access(path, os.R_OK):
-            if not self.is_dryrun:
-                shutil.copytree(path, dst)
-                self.basket_list.add(basename(path), path,
-                                     self.basket_path, dst, datetime.datetime.now())
-                self.basket_list.save()
-                return True
-        else:
-            return False
-
-
-
-
 
 
 
@@ -132,25 +101,6 @@ class BasketHandler(object):
                 return False
         else:
             return True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def check_in_basket(self, path):
         path_check = join(self.basket_path, basename(path))
