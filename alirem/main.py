@@ -105,7 +105,6 @@ def alirem():
                                                    logger,
                                                    default_config['forceremove'],
                                                    default_config['basketpath'])
-
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
 

@@ -11,6 +11,7 @@ class RemoveHandler(object):
     def __init__(self, is_dir,
                  is_recursive, is_interactive, is_dryrun,
                  is_basket, logger, is_force, basket_path='basket'):
+
         self.basket_path = basket_path
         self.is_dir = is_dir
         self.is_recursive = is_recursive
