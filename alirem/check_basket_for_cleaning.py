@@ -5,6 +5,7 @@ import shutil
 import datetime
 import alirem.basket_list as b_list
 import alirem.getsize as getsize
+import alirem.exception as exception
 
 class CheckBasketHandler(object):
     def __init__(self, logger, is_show=True, basket_path='basket',
@@ -15,16 +16,15 @@ class CheckBasketHandler(object):
         self.mode = mode
         self.time = time
         self.size = size
-
+        self.basket_list = b_list.BasketList()
+        self.basket_list.load()
     def show_basket(self, basket_list):
+
         if self.is_show:
             basket_list.show()
 
     def check_basket_for_cleaning(self):
-
-        basket_list = b_list.BasketList()
-        basket_list.load()
-        self.show_basket(basket_list)
+        self.show_basket(self.basket_list)
         if exists(self.basket_path):
 
             if self.mode == 'size':
@@ -32,26 +32,23 @@ class CheckBasketHandler(object):
                     for obj in listdir(self.basket_path):
                         if isfile(join(self.basket_path, obj)):
                             remove(join(self.basket_path, obj))
-                            basket_list.remove(basket_list.search(obj, self.basket_path))
+                            self.basket_list.remove(self.basket_list.search(obj, self.basket_path))
                         else:
                             shutil.rmtree(join(self.basket_path, obj))
-                            basket_list.remove(basket_list.search(obj, self.basket_path))
+                            self.basket_list.remove(self.basket_list.search(obj, self.basket_path))
 
             elif self.mode == 'time':
                 for obj in listdir(self.basket_path):
                     if isfile(join(self.basket_path, obj)):
                         self.checking_file_for_deletion(join(self.basket_path, obj), self.time,
-                                                        basket_list, self.basket_path)
+                                                        self.basket_list, self.basket_path)
                     else:
                         self.checking_dir_for_deletion(join(self.basket_path, obj), self.time,
-                                                       basket_list, self.basket_path)
+                                                       self.basket_list, self.basket_path)
 
         else:
-            self.logger.log("Basket doesn't exist", logging.ERROR)
-        basket_list.save()
-        # if self.is_show:
-        #     print 'AFTER: '
-        #     basket_list.show()
+            self.logger.log("Basket doesn't exist", logging.ERROR, exception.BasketDoesNotExists)
+        self.basket_list.save()
 
     def checking_file_for_deletion(self, path, time, basket_list, basket_path):
         file_time = basket_list.search(basename(path), dirname(path)).time

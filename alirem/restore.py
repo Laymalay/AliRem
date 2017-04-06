@@ -5,7 +5,7 @@ from os import remove
 import logging
 import shutil
 import alirem.basket_list as basketlist
-
+import alirem.exception as exception
 
 def restore(name_el, basket_path, is_force, logger):
 
@@ -28,20 +28,20 @@ def restore(name_el, basket_path, is_force, logger):
             elif not is_force:#if file exists and force=False
                 logger.log("""File {} can not be restored. File with
                                     the same name already exists""".format(basename(dst)),
-                           logging.WARNING, 1)
+                           logging.ERROR, exception.FileExists)
 
             else:
                 if isfile(dst):
                     remove(dst)
                     logger.log("""Old file was replaced by restored
                                         file {}""".format(basename(dst)),
-                               logging.INFO, 0)
+                               logging.INFO)
 
                 else:
                     shutil.rmtree(dst)
                     logger.log("""Old directory was replaced by restored
                                         file {}""".format(basename(dst)),
-                               logging.INFO, 0)
+                               logging.INFO)
                 shutil.copyfile(index_name, dst)
                 remove(index_name)
                 basket_list.remove(element)
@@ -52,27 +52,28 @@ def restore(name_el, basket_path, is_force, logger):
                 shutil.copytree(index_name, dst)
                 shutil.rmtree(index_name)
                 basket_list.remove(element)
-                logger.log("Directory {} restored".format(basename(dst)), logging.INFO, 0)
+                logger.log("Directory {} restored".format(basename(dst)), logging.INFO)
 
             elif not is_force:#if file exists and force=False
                 logger.log("""Directory {} can not be restored. Directory or file with
                                 the same name already exists""".format(basename(dst)),
-                           logging.WARNING, 1)
+                           logging.WARNING, exception.DirectoryExists)
 
             else:
                 if isfile(dst):
                     remove(dst)
                     logger.log("""Old file was replaced by restored
                                     directory {}""".format(basename(dst)),
-                               logging.INFO, 0)
+                               logging.INFO)
                 else:
                     shutil.rmtree(dst)#delete file if exist the same name
                     logger.log("""Old directory was replaced by restored
                                     directory {}""".format(basename(dst)),
-                               logging.INFO, 0)
+                               logging.INFO)
                 shutil.copytree(index_name, dst)
                 shutil.rmtree(index_name)
                 basket_list.remove(element)
     else:
-        logger.log("Cannot find such file {} in basket".format(name_el), logging.WARNING, 1)
+        logger.log("Cannot find such file {} in basket".format(name_el),
+                   logging.ERROR, exception.NoSuchFileInBasket)
         basket_list.save()

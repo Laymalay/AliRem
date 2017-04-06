@@ -4,6 +4,7 @@ import logging
 import logging.config
 
 
+
 class Logger(object):
     def __init__(self, mode_for_file, mode_for_cmd, path, is_silent):
         self.is_silent = is_silent
@@ -56,12 +57,12 @@ class Logger(object):
 
         return logger
 
-    def log(self, msg, level, exit_code=None):
+    def log(self, msg, level, error=None):
         if not self.is_silent:
             self.logger.log(level, msg)
+        if error is not None:
+            raise error()
 
-        if exit_code is not None and level == logging.ERROR:
-            exit(exit_code)
 
 
 

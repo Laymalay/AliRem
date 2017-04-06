@@ -7,6 +7,7 @@ import alirem.logger as log
 import alirem.remove as remover
 import alirem.restore as restorer
 import alirem.check_basket_for_cleaning as CheckBasketForCleaning
+import alirem.exception as exception
 
 
 def createParser():
@@ -46,11 +47,14 @@ def createParser():
     removeParser.add_argument('-b', '--basket', action='store_true', default=None,
                               help='remove to basket')
     removeParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
+    removeParser.add_argument('-f', '--forceremove', action='store_true', default=None,
+                              help='force remove')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('restorename', nargs='+')
     restoreParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
-    restoreParser.add_argument('-f', '--force', action='store_true', default=None)
+    restoreParser.add_argument('-f', '--forcerestore', action='store_true', default=None,
+                               help='force restore')
     namespace = parser.parse_args() #(sys.args[1:])
     return namespace
 
@@ -67,49 +71,60 @@ def sync_params(cmd, default_config, config=None):
 def alirem():
 
     args = createParser()
-    config = None
+
+
     if args.configfile is not None:
         with open(args.configfile) as config_file:
             config = json.load(config_file)
-
+    else:
+        config = None
     with open('config_file_default.json') as default_config_file:
         default_config = json.load(default_config_file)
 
     sync_params(vars(args), default_config, config)
 
     if args.showparam:
-        for key, value in default_config.iteritems():
-            print key+':'+str(value)
+        show_params(default_config)
 
     logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
                         default_config['logfilepath'], default_config['silent'])
+    try:
+        if args.command == "basket":
+            check_basket = CheckBasketForCleaning.CheckBasketHandler(logger,
+                                                                     default_config['show'],
+                                                                     default_config['basketpath'],
+                                                                     default_config['clearmode'],
+                                                                     default_config['deltatime'],
+                                                                     default_config['maxsize'])
+            check_basket.check_basket_for_cleaning()
+        elif args.command == "remove":
+            remove_handler = remover.RemoveHandler(args.dir, args.recursive,
+                                                   default_config['interactive'],
+                                                   default_config['dryrun'],
+                                                   default_config['basket'],
+                                                   logger,
+                                                   default_config['forceremove'],
+                                                   default_config['basketpath'])
 
-    if args.command == "basket":
-        check_basket = CheckBasketForCleaning.CheckBasketHandler(logger,
-                                                                 default_config['show'],
-                                                                 default_config['basketpath'],
-                                                                 default_config['clearmode'],
-                                                                 default_config['deltatime'],
-                                                                 default_config['maxsize'])
-        check_basket.check_basket_for_cleaning()
-    elif args.command == "remove":
-        remove_handler = remover.RemoveHandler(args.dir, args.recursive,
-                                               default_config['interactive'],
-                                               default_config['dryrun'],
-                                               default_config['basket'],
-                                               logger, default_config['basketpath'])
-        try:
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
-        except remover.MyException:
-            logger.log("Unable to delete data", logging.ERROR, 1)
 
-    elif args.command == "restore":
-        for restore_name in args.restorename:
-            restorer.restore(restore_name, default_config['basketpath'],
-                             default_config['force'], logger)
-    else:
-        logger.log("Invalid operation", logging.ERROR, 1)
+
+        elif args.command == "restore":
+            for restore_name in args.restorename:
+                restorer.restore(restore_name, default_config['basketpath'],
+                                 default_config['forcerestore'], logger)
+        else:
+            logger.log("Invalid operation", logging.ERROR, exception.InvalidOperation)
+
+    except exception.Error as error:
+        print error.exit_code
+        exit(error.exit_code)
+
+def show_params(default_config):
+    for key, value in default_config.iteritems():
+        print key+':'+str(value)
 
 if __name__ == '__main__':
     alirem()
+
