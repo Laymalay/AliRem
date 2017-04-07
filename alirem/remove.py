@@ -4,7 +4,7 @@ import logging
 import os
 import alirem.basket as basket
 import alirem.exception as exception
-
+import alirem.progress as progress
 
 class RemoveHandler(object):
 
@@ -32,7 +32,9 @@ class RemoveHandler(object):
 
     def __remove_file(self, path):
         if not self.is_dryrun:
-            os.remove(path)
+            progress.show_progress(task=lambda: os.remove(path),
+                                   total_size=os.path.getsize(path),
+                                   get_now_size=lambda: os.path.getsize(path))
 
     def __remove_empty_dir(self, path):
         if not self.is_dryrun:
@@ -122,4 +124,4 @@ class RemoveHandler(object):
                                         logging.INFO)
                     else:
                         self.file_removed = False
-
+   

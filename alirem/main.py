@@ -28,7 +28,7 @@ def createParser():
     parser.add_argument('--logmodefile', action='store',
                         choices=['info', 'debug', 'warning', 'error'], default=None,
                         help='logging level for cmd')
-
+    
 
     clearParser = subparsers.add_parser('basket')
     clearParser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'],

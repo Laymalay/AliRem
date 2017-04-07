@@ -5,7 +5,7 @@ import os
 from os import listdir, mkdir, access, makedirs
 from os.path import join, exists, isfile, basename, isdir, dirname
 import logging
-
+import alirem.progress as progress
 import alirem.exception as exception
 
 class CopyHandler(object):
@@ -65,11 +65,11 @@ class CopyHandler(object):
 
     def copy_file(self, path, dst):
         if self.asking('\nDo u want to move this file: {0} to {1}?'.format(basename(path),
-                                                                           basename(dst))):
+                                                                           dst)):
             if access(path, os.R_OK):
                 self.__copy_file(path, dst)
                 self.logger.log("Moved file {0} to the {1}".format(basename(path),
-                                                                   basename(dst)), logging.INFO)
+                                                                   dst), logging.INFO)
                 return True
             else:
                 self.logger.log("Permission Denied: {}".format(path), logging.ERROR,
@@ -81,7 +81,9 @@ class CopyHandler(object):
 
     def __copy_file(self, path, dst):
         if not self.is_dryrun:
-            shutil.copyfile(path, dst)
+            progress.show_progress(task=lambda: shutil.copyfile(path, dst),
+                                   total_size=os.path.getsize(path),
+                                   get_now_size=lambda: os.path.getsize(dst))
 
     def asking(self, msg):
         if self.is_interactive:
