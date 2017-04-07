@@ -5,7 +5,7 @@
     "basketpath":"basket",
     "basket":false,
     "forceremove":false,
-    "forcerestore":true,
+    "forcerestore":false,
     "logmodecmd":"INFO",
     "logmodefile":null,
     "logfilepath":"alirem",
