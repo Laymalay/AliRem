@@ -16,6 +16,7 @@ def createParser():
     parser.add_argument('--showparam', action='store_true')
     parser.add_argument('--dryrun', action='store_true', default=None)
     parser.add_argument('-i', '--interactive', action='store_true', default=None)
+    parser.add_argument('-f', '--force', action='store_true', default=None)
     parser.add_argument('--configfile', action='store', help='path to config file')
     parser.add_argument('--logfilepath', action='store',
                         help='path to logging file without file extension')
@@ -27,6 +28,7 @@ def createParser():
     parser.add_argument('--logmodefile', action='store',
                         choices=['info', 'debug', 'warning', 'error'], default=None,
                         help='logging level for cmd')
+
 
     clearParser = subparsers.add_parser('basket')
     clearParser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'],
@@ -47,15 +49,15 @@ def createParser():
     removeParser.add_argument('-b', '--basket', action='store_true', default=None,
                               help='remove to basket')
     removeParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
-    removeParser.add_argument('-f', '--forceremove', action='store_true', default=None,
-                              help='force remove')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('restorename', nargs='+')
     restoreParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
-    restoreParser.add_argument('-f', '--forcerestore', action='store_true', default=None,
-                               help='force restore')
-    namespace = parser.parse_args() #(sys.args[1:])
+    restoreParser.add_argument('-m', '--merge', action='store_true', default=None,
+                               help='merge directores')
+    restoreParser.add_argument('-r', '--replace', action='store_true', default=None,
+                               help='replace existing files')
+    namespace = parser.parse_args()
     return namespace
 
 def sync_params(cmd, default_config, config=None):
@@ -87,7 +89,8 @@ def alirem():
         show_params(default_config)
 
     logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
-                        default_config['logfilepath'], default_config['silent'])
+                        default_config['logfilepath'], default_config['silent'],
+                        default_config['force'])
     try:
         if args.command == "basket":
             check_basket = CheckBasketForCleaning.CheckBasketHandler(logger,
@@ -103,7 +106,6 @@ def alirem():
                                                    default_config['dryrun'],
                                                    default_config['basket'],
                                                    logger,
-                                                   default_config['forceremove'],
                                                    default_config['basketpath'])
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
@@ -111,8 +113,9 @@ def alirem():
 
         elif args.command == "restore":
             for restore_name in args.restorename:
-                restorer.restore(restore_name, default_config['basketpath'],
-                                 default_config['forcerestore'], logger)
+                restorer.restore(restore_name, default_config['basketpath'], logger=logger,
+                                 is_merge=default_config['merge'],
+                                 is_replace=default_config['replace'])
         else:
             logger.log("Invalid operation", logging.ERROR, exception.InvalidOperation)
 

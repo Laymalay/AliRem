@@ -10,7 +10,7 @@ class RemoveHandler(object):
 
     def __init__(self, is_dir,
                  is_recursive, is_interactive, is_dryrun,
-                 is_basket, logger, is_force, basket_path='basket'):
+                 is_basket, logger, basket_path='basket'):
 
         self.basket_path = basket_path
         self.is_dir = is_dir
@@ -20,7 +20,6 @@ class RemoveHandler(object):
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
         self.file_removed = True
-        self.is_force = is_force
 
     def remove_empty_dir(self, path):
         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
@@ -28,6 +27,8 @@ class RemoveHandler(object):
                 os.rmdir(path)
                 return True
         else:
+            self.logger.log("Permission Denied rm",
+                            logging.ERROR, exception.PermissionDenied)
             return False
 
     def remove_file(self, path):
@@ -36,6 +37,8 @@ class RemoveHandler(object):
                 os.remove(path)
                 return True
         else:
+            self.logger.log("Permission Denied rm",
+                            logging.ERROR, exception.PermissionDenied)
             return False
 
     def asking(self, msg):
@@ -54,9 +57,8 @@ class RemoveHandler(object):
             if self.is_basket:
                 baskethandler = basket.BasketHandler(self.basket_path, path,
                                                      self.is_dir, self.is_recursive, self.logger,
-                                                     self.is_dryrun, self.is_interactive,
-                                                     self.is_force)
-                # if baskethandler.run() is True:
+                                                     self.is_dryrun, self.is_interactive)
+
                 baskethandler.run()
                 self.remove(path)
 
@@ -111,7 +113,3 @@ class RemoveHandler(object):
                     else:
                         self.file_removed = False
 
-            else:
-                if not self.is_force:
-                    self.logger.log("Permission Denied rm",
-                                    logging.ERROR, exception.PermissionDenied)

@@ -7,7 +7,7 @@ import shutil
 import alirem.basket_list as basketlist
 import alirem.copy as copy
 
-def restore(name_el, basket_path, is_force, logger, is_merge=None):
+def restore(name_el, basket_path, logger, is_merge=None, is_replace=None):
 
     basket_list = basketlist.BasketList()
     basket_list.load()
@@ -17,11 +17,15 @@ def restore(name_el, basket_path, is_force, logger, is_merge=None):
         if not exists(dirname(element.rm_path)):
             makedirs(dirname(element.rm_path))
         dst = element.rm_path
-        copyhandler = copy.CopyHandler(logger,
-                                       is_force)
+        copyhandler = copy.CopyHandler(logger=logger,
+                                       is_merge=is_merge,
+                                       is_replace=is_replace)
         copyhandler.run(index_name, dst)
 
-
+        if isfile(index_name):
+            remove(index_name)
+        else:
+            shutil.rmtree(index_name)
         basket_list.remove(element)
 
     else:

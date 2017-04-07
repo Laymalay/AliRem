@@ -13,7 +13,7 @@ import alirem.copy as copy
 class BasketHandler(object):
     def __init__(self, basket_path, path, is_dir,
                  is_recursive, logger,
-                 is_dryrun, is_interactive, is_force):
+                 is_dryrun, is_interactive):
         self.basket_path = basket_path
         self.path = path
         self.is_dir = is_dir
@@ -22,22 +22,34 @@ class BasketHandler(object):
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
         self.file_copied = True
-        self.is_force = is_force
+
+    def check_access_for_dir(self, path):
+        if isdir(path):
+            if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
+                return True
+            else:
+                self.logger.log("Permission Denied: {}".format(path),
+                                logging.ERROR, exception.PermissionDenied)
+                return False
+        else:
+            return True
 
     def run(self):
 
         if not exists(self.basket_path):
             mkdir(self.basket_path)
             self.logger.log("Basket was created", logging.INFO)
-        if self.check_flags():
+
+        if self.check_access_for_dir(self.path) and self.check_flags():
             basket_list = basketlist.BasketList()
             basket_list.load()
+
+
             name = basename(self.path)
             new_name = self.check_in_basket(name, self.basket_path)
             dst = join(self.basket_path, new_name)
 
             copyhandler = copy.CopyHandler(self.logger,
-                                           self.is_force,
                                            self.is_interactive,
                                            self.is_dryrun)
             copyhandler.run(self.path, dst)
@@ -47,74 +59,6 @@ class BasketHandler(object):
                             self.basket_path, join(self.basket_path, new_name),
                             datetime.datetime.now())
             basket_list.save()
-
-    # def copy(self, path, dst):
-
-    #     if isfile(path):
-    #         if self.copy_file(path, dst):
-    #             return True
-    #         else:
-    #             return False
-    #     if isdir(path):
-
-    #         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
-    #             self.copy_dir(path, dst)
-    #             return True
-    #         else:
-    #             return False
-
-
-
-    # def copy_dir(self, path, dst):
-    #     for obj in listdir(path):
-    #         if not self.copy(join(path, obj), join(dst, obj)):
-    #             self.file_copied = False
-    #     if self.file_copied:
-    #         self.logger.log("Directory {} copied".format(os.path.basename(path)),
-    #                         logging.INFO)
-    #     else:
-    #         if not self.is_force:
-    #             self.logger.log("Permission Denied ",
-    #                             logging.ERROR, exception.PermissionDenied)
-
-
-
-    # def copy_file(self, path, dst):
-    #     if self.asking('\nDo u want to move this file: {} to basket?'.format(basename(path))):
-    #         if self.check_access_and_copy_file(path, dst):
-    #          self.logger.log("Moved file {} to the basket".format(basename(path)), logging.INFO)
-
-    #             return True
-    #         else:
-    #             return False
-    #     else:
-    #         return False
-
-
-    # def check_access_and_copy_file(self, path, dst):
-    #     if access(path, os.R_OK):
-    #         if not self.is_dryrun:
-    #             if not exists(dirname(dst)):
-    #                 makedirs(dirname(dst))
-    #             # new_name = self.check_in_basket(path, dst)
-    #             # newdst = join(dst, basename(new_name))
-    #             shutil.copyfile(path, dst)
-    #             return True
-    #     else:
-    #         return False
-
-
-
-    # def asking(self, msg):
-    #     if self.is_interactive:
-    #         print msg+'\n'
-    #         answer = raw_input('[Y/n]\n')
-    #         if answer != "n":
-    #             return True
-    #         else:
-    #             return False
-    #     else:
-    #         return True
 
     def check_in_basket(self, path, dst):
         path_check = join(dst, basename(path))

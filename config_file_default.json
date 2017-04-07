@@ -4,13 +4,14 @@
     "maxsize":100,
     "basketpath":"basket",
     "basket":false,
-    "forceremove":false,
-    "forcerestore":false,
+    "force":false,
     "logmodecmd":"INFO",
     "logmodefile":null,
     "logfilepath":"alirem",
     "silent":false,
     "show":true,
     "dryrun":false,
-    "interactive":false
+    "interactive":false,
+    "merge":false,
+    "replace":false
 }

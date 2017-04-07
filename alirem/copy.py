@@ -5,18 +5,19 @@ import os
 from os import listdir, mkdir, access, makedirs
 from os.path import join, exists, isfile, basename, isdir, dirname
 import logging
-import datetime
-import alirem.basket_list as basketlist
+
 import alirem.exception as exception
 
 class CopyHandler(object):
-    def __init__(self, logger, is_force,
+    def __init__(self, logger, is_merge=False, is_replace=False,
                  is_dryrun=None, is_interactive=None):
         self.logger = logger
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
         self.file_copied = True
-        self.is_force = is_force
+        self.is_merge = is_merge
+        self.is_replace = is_replace
+
 
     def run(self, path, dst):
         self.copy(path, dst)
@@ -37,8 +38,16 @@ class CopyHandler(object):
                 return False
 
 
+    def create_dir(self, path):
+        if self.is_replace and exists(path):
+            shutil.rmtree(path)
+            mkdir(path)
+        if not exists(path) and not self.is_merge:
+            mkdir(path)
+
 
     def copy_dir(self, path, dst):
+        self.create_dir(dst)
         for obj in listdir(path):
             if not self.copy(join(path, obj), join(dst, obj)):
                 self.file_copied = False
@@ -46,9 +55,8 @@ class CopyHandler(object):
             self.logger.log("Directory {} copied".format(os.path.basename(path)),
                             logging.INFO)
         else:
-            if not self.is_force:
-                self.logger.log("Permission Denied ",
-                                logging.ERROR, exception.PermissionDenied)
+            self.logger.log("Permission Denied ",
+                            logging.ERROR, exception.PermissionDenied)
 
 
 
@@ -56,7 +64,6 @@ class CopyHandler(object):
         if self.asking('\nDo u want to move this file: {} to basket?'.format(basename(path))):
             if self.check_access_and_copy_file(path, dst):
                 self.logger.log("Moved file {} to the basket".format(basename(path)), logging.INFO)
-
                 return True
             else:
                 return False
@@ -67,8 +74,8 @@ class CopyHandler(object):
     def check_access_and_copy_file(self, path, dst):
         if access(path, os.R_OK):
             if not self.is_dryrun:
-                if not exists(dirname(dst)):
-                    makedirs(dirname(dst))
+                # if not exists(dirname(dst)):
+                #     makedirs(dirname(dst))
                 shutil.copyfile(path, dst)
                 return True
         else:

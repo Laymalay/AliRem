@@ -6,9 +6,10 @@ import logging.config
 
 
 class Logger(object):
-    def __init__(self, mode_for_file, mode_for_cmd, path, is_silent):
+    def __init__(self, mode_for_file, mode_for_cmd, path, is_silent, is_force):
         self.is_silent = is_silent
         self.logger = self.setup(mode_for_cmd, path, mode_for_file)
+        self.is_force = is_force
 
     def parser_mode(self, mode):
         if mode.upper() == 'INFO':
@@ -60,7 +61,7 @@ class Logger(object):
     def log(self, msg, level, error=None):
         if not self.is_silent:
             self.logger.log(level, msg)
-        if error is not None:
+        if error is not None and not self.is_force:
             raise error()
 
 
