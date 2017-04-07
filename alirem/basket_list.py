@@ -29,7 +29,7 @@ class BasketList(object):
 
     def remove(self, el):
         self.array.remove(el)
-#TODO: is it necessary to call func like add_element?
+
     def add(self, name, rm_path, basket_path, index_in_basket, time):
         el = Element(name, rm_path, basket_path, index_in_basket, time)
         self.array.append(el)
@@ -40,9 +40,11 @@ class BasketList(object):
                 self.array = pickle.load(f)
             else:
                 self.array = []
+            tmp_arr = []
             for el in self.array:
-                if not exists(el.index_in_basket):
-                    self.array.remove(el)
+                if exists(el.index_in_basket):
+                    tmp_arr.append(el)
+            self.array = tmp_arr
 
     def save(self):
         with open('basket_list.pickle', 'wb') as f:

@@ -11,9 +11,11 @@ import alirem.exception as exception
 import alirem.copy as copy
 
 class BasketHandler(object):
-    def __init__(self, basket_path, path, is_dir,
-                 is_recursive, logger,
-                 is_dryrun, is_interactive):
+    def __init__(self, logger,
+                 path, is_dir=False,
+                 is_recursive=False,
+                 basket_path='basket',
+                 is_dryrun=False, is_interactive=False):
         self.basket_path = basket_path
         self.path = path
         self.is_dir = is_dir
@@ -49,10 +51,13 @@ class BasketHandler(object):
             new_name = self.check_in_basket(name, self.basket_path)
             dst = join(self.basket_path, new_name)
 
-            copyhandler = copy.CopyHandler(self.logger,
-                                           self.is_interactive,
-                                           self.is_dryrun)
+            copyhandler = copy.CopyHandler(logger=self.logger,
+                                           is_interactive=self.is_interactive,
+                                           is_dryrun=self.is_dryrun)
+            
+            
             copyhandler.run(self.path, dst)
+
 
             basket_list.add(new_name,
                             os.path.abspath(self.path),

@@ -10,7 +10,7 @@ import alirem.exception as exception
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
-                 is_dryrun=None, is_interactive=None):
+                 is_dryrun=False, is_interactive=False):
         self.logger = logger
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
@@ -20,30 +20,36 @@ class CopyHandler(object):
 
 
     def run(self, path, dst):
-        self.copy(path, dst)
+        try:
+            self.copy(path, dst)
+        except exception.PermissionDenied:
+            shutil.rmtree(dst)
+            raise exception.PermissionDenied
 
     def copy(self, path, dst):
-
         if isfile(path):
             if self.copy_file(path, dst):
                 return True
             else:
                 return False
         if isdir(path):
-
             if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
                 self.copy_dir(path, dst)
                 return True
             else:
                 return False
 
-
     def create_dir(self, path):
-        if self.is_replace and exists(path):
-            shutil.rmtree(path)
-            mkdir(path)
-        if not exists(path) and not self.is_merge:
-            mkdir(path)
+        if not self.is_dryrun:
+            if exists(path) and not self.is_merge and not self.is_replace:
+                self.logger.log("Name conflict, use merge or replace param",
+                                logging.ERROR, exception.FileExists)
+            if self.is_replace and exists(path):
+                shutil.rmtree(path)
+                mkdir(path)
+            if not exists(path) and not self.is_merge:
+                mkdir(path)
+
 
 
     def copy_dir(self, path, dst):
@@ -52,36 +58,30 @@ class CopyHandler(object):
             if not self.copy(join(path, obj), join(dst, obj)):
                 self.file_copied = False
         if self.file_copied:
-            self.logger.log("Directory {} copied".format(os.path.basename(path)),
+            self.logger.log("Directory {0} copied to {1}".format(os.path.basename(path), dst),
                             logging.INFO)
-        else:
-            self.logger.log("Permission Denied ",
-                            logging.ERROR, exception.PermissionDenied)
 
 
 
     def copy_file(self, path, dst):
-        if self.asking('\nDo u want to move this file: {} to basket?'.format(basename(path))):
-            if self.check_access_and_copy_file(path, dst):
-                self.logger.log("Moved file {} to the basket".format(basename(path)), logging.INFO)
+        if self.asking('\nDo u want to move this file: {0} to {1}?'.format(basename(path),
+                                                                           basename(dst))):
+            if access(path, os.R_OK):
+                self.__copy_file(path, dst)
+                self.logger.log("Moved file {0} to the {1}".format(basename(path),
+                                                                   basename(dst)), logging.INFO)
                 return True
             else:
-                return False
+                self.logger.log("Permission Denied: {}".format(path), logging.ERROR,
+                                exception.PermissionDenied)
+
         else:
             return False
 
 
-    def check_access_and_copy_file(self, path, dst):
-        if access(path, os.R_OK):
-            if not self.is_dryrun:
-                # if not exists(dirname(dst)):
-                #     makedirs(dirname(dst))
-                shutil.copyfile(path, dst)
-                return True
-        else:
-            return False
-
-
+    def __copy_file(self, path, dst):
+        if not self.is_dryrun:
+            shutil.copyfile(path, dst)
 
     def asking(self, msg):
         if self.is_interactive:

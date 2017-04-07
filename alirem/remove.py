@@ -8,9 +8,9 @@ import alirem.exception as exception
 
 class RemoveHandler(object):
 
-    def __init__(self, is_dir,
-                 is_recursive, is_interactive, is_dryrun,
-                 is_basket, logger, basket_path='basket'):
+    def __init__(self, logger, is_dir=False,
+                 is_recursive=False, is_interactive=False, is_dryrun=False,
+                 is_basket=False, basket_path='basket'):
 
         self.basket_path = basket_path
         self.is_dir = is_dir
@@ -23,19 +23,26 @@ class RemoveHandler(object):
 
     def remove_empty_dir(self, path):
         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
-            if not self.is_dryrun:
-                os.rmdir(path)
-                return True
+            self.__remove_empty_dir(path)
+            return True
         else:
             self.logger.log("Permission Denied rm",
                             logging.ERROR, exception.PermissionDenied)
             return False
 
+    def __remove_file(self, path):
+        if not self.is_dryrun:
+            os.remove(path)
+
+    def __remove_empty_dir(self, path):
+        if not self.is_dryrun:
+            os.rmdir(path)
+
+
     def remove_file(self, path):
         if os.access(path, os.R_OK):
-            if not self.is_dryrun:
-                os.remove(path)
-                return True
+            self.__remove_file(path)
+            return True
         else:
             self.logger.log("Permission Denied rm",
                             logging.ERROR, exception.PermissionDenied)
@@ -55,9 +62,12 @@ class RemoveHandler(object):
     def run_remove(self, path):
         if os.path.exists(path):
             if self.is_basket:
-                baskethandler = basket.BasketHandler(self.basket_path, path,
-                                                     self.is_dir, self.is_recursive, self.logger,
-                                                     self.is_dryrun, self.is_interactive)
+                baskethandler = basket.BasketHandler(basket_path=self.basket_path, path=path,
+                                                     is_dir=self.is_dir,
+                                                     is_recursive=self.is_recursive,
+                                                     logger=self.logger,
+                                                     is_dryrun=self.is_dryrun,
+                                                     is_interactive=self.is_interactive)
 
                 baskethandler.run()
                 self.remove(path)

@@ -101,19 +101,21 @@ def alirem():
                                                                      default_config['maxsize'])
             check_basket.check_basket_for_cleaning()
         elif args.command == "remove":
-            remove_handler = remover.RemoveHandler(args.dir, args.recursive,
-                                                   default_config['interactive'],
-                                                   default_config['dryrun'],
-                                                   default_config['basket'],
-                                                   logger,
-                                                   default_config['basketpath'])
+            remove_handler = remover.RemoveHandler(is_dir=args.dir, is_recursive=args.recursive,
+                                                   is_interactive=default_config['interactive'],
+                                                   is_dryrun=default_config['dryrun'],
+                                                   is_basket=default_config['basket'],
+                                                   logger=logger,
+                                                   basket_path=default_config['basketpath'])
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
 
 
         elif args.command == "restore":
             for restore_name in args.restorename:
-                restorer.restore(restore_name, default_config['basketpath'], logger=logger,
+                restorer.restore(restore_name,
+                                 basket_path=default_config['basketpath'],
+                                 logger=logger,
                                  is_merge=default_config['merge'],
                                  is_replace=default_config['replace'])
         else:
