@@ -1,9 +1,10 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import threading
+import time
 from blessings import Terminal
 import colorama
-import time
+
 
 def show_progress(task, total_size, get_now_size):
     PROGRESS_SIZE = 100
@@ -13,13 +14,13 @@ def show_progress(task, total_size, get_now_size):
     worker.start()
 
     while worker.isAlive():
-        
+
         time.sleep(0.5)
         try:
             now_size = get_now_size()
         except Exception:
             return
-        
+
         progress = int((float(now_size) / (total_size + 1)) * PROGRESS_SIZE)
         a = t.blue
         if progress > 20:
@@ -29,7 +30,7 @@ def show_progress(task, total_size, get_now_size):
         if progress > 80:
             a = t.green
 
-        with t.location(0, t.height - 1):
-            print a("{}{}|{}".format("#" * progress, " " * (PROGRESS_SIZE - progress), "\033[F"))
+
+        print a("{}{}|{}".format("#" * progress, " " * (PROGRESS_SIZE - progress), "\033[F"))
     print t.green("{}|{}".format("#" * 100, "\033[F"))
     print

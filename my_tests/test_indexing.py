@@ -52,7 +52,6 @@ class TestRemove(unittest.TestCase):
         handler_file.run_remove(self.file_path)
         self.assertEqual(exists(self.file_path), False)
         self.assertEqual(exists(join(self.basket, basename(self.file_path)+"(1)")), True)
-     
 
 
     def tearDown(self):

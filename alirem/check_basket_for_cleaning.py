@@ -20,7 +20,6 @@ class CheckBasketHandler(object):
         self.basket_list.load()
     def show_basket(self, basket_list):
         if self.is_show:
-            # basket_list.load()
             basket_list.show()
 
     def check_basket_for_cleaning(self):

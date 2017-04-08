@@ -49,6 +49,7 @@ def createParser():
     removeParser.add_argument('-b', '--basket', action='store_true', default=None,
                               help='remove to basket')
     removeParser.add_argument('-p', '--basketpath', action='store', help='path to basket')
+    removeParser.add_argument('--regexp', action='store', help='regexp for searching in file-tree')
 
     restoreParser = subparsers.add_parser('restore')
     restoreParser.add_argument('restorename', nargs='+')
@@ -106,7 +107,8 @@ def alirem():
                                                    is_dryrun=default_config['dryrun'],
                                                    is_basket=default_config['basket'],
                                                    logger=logger,
-                                                   basket_path=default_config['basketpath'])
+                                                   basket_path=default_config['basketpath'],
+                                                   regexp=args.regexp)
             for remove_path in args.removepath:
                 remove_handler.run_remove(remove_path)
 

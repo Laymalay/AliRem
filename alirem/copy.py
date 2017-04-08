@@ -7,17 +7,18 @@ from os.path import join, exists, isfile, basename, isdir, dirname
 import logging
 import alirem.progress as progress
 import alirem.exception as exception
+import re
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
-                 is_dryrun=False, is_interactive=False):
+                 is_dryrun=False, is_interactive=False, regexp=None):
         self.logger = logger
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
         self.file_copied = True
         self.is_merge = is_merge
         self.is_replace = is_replace
-
+        self.regexp = regexp
 
     def run(self, path, dst):
         try:
@@ -64,16 +65,17 @@ class CopyHandler(object):
 
 
     def copy_file(self, path, dst):
-        if self.asking('\nDo u want to move this file: {0} to {1}?'.format(basename(path),
-                                                                           dst)):
-            if access(path, os.R_OK):
-                self.__copy_file(path, dst)
-                self.logger.log("Moved file {0} to the {1}".format(basename(path),
-                                                                   dst), logging.INFO)
-                return True
-            else:
-                self.logger.log("Permission Denied: {}".format(path), logging.ERROR,
-                                exception.PermissionDenied)
+        if self.check_regexp(path=path, regexp=self.regexp):
+            if self.asking('\nDo u want to move this file: {0} to {1}?'.format(basename(path),
+                                                                                dst)):
+                if access(path, os.R_OK):
+                    self.__copy_file(path, dst)
+                    self.logger.log("Moved file {0} to the {1}".format(basename(path),
+                                                                        dst), logging.INFO)
+                    return True
+                else:
+                    self.logger.log("Permission Denied: {}".format(path), logging.ERROR,
+                                    exception.PermissionDenied)
 
         else:
             return False
@@ -96,5 +98,15 @@ class CopyHandler(object):
         else:
             return True
 
-
+    def check_regexp(self, regexp, path):
+        if regexp != None:
+            rez = re.search(regexp, path)
+            if rez != None:
+                if rez.group(0) == path:
+                    return True
+            self.logger.log("File not copy '{}': Does not match the pattern.".format(path),
+                            logging.INFO)
+            return False
+        else:
+            return True
 

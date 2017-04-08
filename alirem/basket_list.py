@@ -22,8 +22,9 @@ class BasketList(object):
 
     def search(self, name, basket_path):
         for el in self.array:
+
             if (basename(el.index_in_basket) == name) and (
-                    el.basket_path == basename(basket_path)):
+                    os.path.abspath(el.basket_path) == os.path.abspath(basket_path)):
                 return el
         return None
 

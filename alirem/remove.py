@@ -5,12 +5,13 @@ import os
 import alirem.basket as basket
 import alirem.exception as exception
 import alirem.progress as progress
+import re
 
 class RemoveHandler(object):
 
     def __init__(self, logger, is_dir=False,
                  is_recursive=False, is_interactive=False, is_dryrun=False,
-                 is_basket=False, basket_path='basket'):
+                 is_basket=False, basket_path='basket', regexp=None):
 
         self.basket_path = basket_path
         self.is_dir = is_dir
@@ -20,6 +21,7 @@ class RemoveHandler(object):
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
         self.file_removed = True
+        self.regexp = regexp
 
     def remove_empty_dir(self, path):
         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
@@ -33,8 +35,8 @@ class RemoveHandler(object):
     def __remove_file(self, path):
         if not self.is_dryrun:
             progress.show_progress(task=lambda: os.remove(path),
-                                   total_size=os.path.getsize(path),
-                                   get_now_size=lambda: os.path.getsize(path))
+                                    total_size=os.path.getsize(path),
+                                    get_now_size=lambda: os.path.getsize(path))
 
     def __remove_empty_dir(self, path):
         if not self.is_dryrun:
@@ -54,10 +56,7 @@ class RemoveHandler(object):
         if self.is_interactive:
             print msg+'\n'
             answer = raw_input('[Y/n]\n')
-            if answer != "n":
-                return True
-            else:
-                return False
+            return bool(answer != "n")
         else:
             return True
 
@@ -69,7 +68,8 @@ class RemoveHandler(object):
                                                      is_recursive=self.is_recursive,
                                                      logger=self.logger,
                                                      is_dryrun=self.is_dryrun,
-                                                     is_interactive=self.is_interactive)
+                                                     is_interactive=self.is_interactive,
+                                                     regexp=self.regexp)
 
                 baskethandler.run()
                 self.remove(path)
@@ -81,10 +81,12 @@ class RemoveHandler(object):
 
     def remove(self, path):
         if os.path.isfile(path):
-            if self.asking('Do u want to delete this file: {}?'.format(os.path.basename(path))):
-                if self.remove_file(path):
-                    self.logger.log("File {} deleted".format(os.path.basename(path)), logging.INFO)
-                    return True
+            if self.check_regexp(path=path, regexp=self.regexp):
+                if self.asking('Do u want to delete this file: {}?'.format(os.path.basename(path))):
+                    if self.remove_file(path):
+                        self.logger.log("File {} deleted".format(os.path.basename(path)),
+                                        logging.INFO)
+                        return True
 
             return False
         elif os.path.isdir(path):
@@ -124,4 +126,16 @@ class RemoveHandler(object):
                                         logging.INFO)
                     else:
                         self.file_removed = False
-   
+
+
+    def check_regexp(self, regexp, path):
+        if regexp != None:
+            rez = re.search(regexp, path)
+            if rez != None:
+                if rez.group(0) == path:
+                    return True
+            self.logger.log("File not deleted '{}': Does not match the pattern.".format(path),
+                            logging.INFO)
+            return False
+        else:
+            return True

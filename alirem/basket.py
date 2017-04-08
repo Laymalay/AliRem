@@ -9,10 +9,11 @@ import datetime
 import alirem.basket_list as basketlist
 import alirem.exception as exception
 import alirem.copy as copy
+import re
 
 class BasketHandler(object):
-    def __init__(self, logger,
-                 path, is_dir=False,
+    def __init__(self, logger, path,
+                 regexp=None, is_dir=False,
                  is_recursive=False,
                  basket_path='basket',
                  is_dryrun=False, is_interactive=False):
@@ -24,6 +25,7 @@ class BasketHandler(object):
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
         self.file_copied = True
+        self.regexp = regexp
 
     def check_access_for_dir(self, path):
         if isdir(path):
@@ -53,9 +55,8 @@ class BasketHandler(object):
 
             copyhandler = copy.CopyHandler(logger=self.logger,
                                            is_interactive=self.is_interactive,
-                                           is_dryrun=self.is_dryrun)
-            
-            
+                                           is_dryrun=self.is_dryrun, regexp=self.regexp)
+
             copyhandler.run(self.path, dst)
 
 
@@ -95,3 +96,5 @@ class BasketHandler(object):
                     return False
         else:
             return True
+
+
