@@ -11,7 +11,9 @@ setup(
 
     entry_points={
         'console_scripts':
-            ['alirem = alirem.main:alirem']
+            ['remove = alirem.main:remove',
+             'restore = alirem.main:restore',
+             'basket = alirem.main:basket']
         }
 
 )

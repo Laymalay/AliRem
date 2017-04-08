@@ -15,14 +15,14 @@ def show_progress(task, total_size, get_now_size):
 
     while worker.isAlive():
 
-        time.sleep(0.5)
+        time.sleep(0.1)
         try:
             now_size = get_now_size()
         except Exception:
             return
 
         progress = int((float(now_size) / (total_size + 1)) * PROGRESS_SIZE)
-        a = t.blue
+        a = t.red
         if progress > 20:
             a = t.red
         if progress > 50:

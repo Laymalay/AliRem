@@ -45,13 +45,16 @@ class CopyHandler(object):
             if exists(path) and not self.is_merge and not self.is_replace:
                 self.logger.log("Name conflict, use merge or replace param",
                                 logging.ERROR, exception.FileExists)
+                return
             if self.is_replace and exists(path):
                 shutil.rmtree(path)
                 mkdir(path)
-            if not exists(path) and self.is_merge:
+                return
+            if self.is_merge and not exists(path):
                 mkdir(path)
-
-
+                return
+            if not exists(path):
+                mkdir(path)
 
     def copy_dir(self, path, dst):
         self.create_dir(dst)
@@ -67,11 +70,11 @@ class CopyHandler(object):
     def copy_file(self, path, dst):
         if self.check_regexp(path=path, regexp=self.regexp):
             if self.asking('\nDo u want to move this file: {0} to {1}?'.format(basename(path),
-                                                                                dst)):
+                                                                               dst)):
                 if access(path, os.R_OK):
                     self.__copy_file(path, dst)
                     self.logger.log("Moved file {0} to the {1}".format(basename(path),
-                                                                        dst), logging.INFO)
+                                                                       dst), logging.INFO)
                     return True
                 else:
                     self.logger.log("Permission Denied: {}".format(path), logging.ERROR,

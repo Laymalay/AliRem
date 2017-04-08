@@ -9,24 +9,23 @@ class Alirem(object):
                  mode='size',
                  time=120, size=1000,
                  mode_for_file='info', mode_for_cmd='info',
-                 path_log='example', is_silent=False):
+                 path_log='example', is_silent=False, is_force=False):
 
         self.basket_path = basket_path
         self.mode = mode
         self.time = time
         self.size = size
-        self.logger = logger.Logger(mode_for_file, mode_for_cmd, path_log, is_silent)
+        self.logger = logger.Logger(mode_for_file, mode_for_cmd, path_log, is_silent, is_force)
 
-    def remove(self, remove_path, is_dir=False, is_recursive=False, is_basket=True):
-        remove_handler = RemoveHandler.RemoveHandler(is_dir,
-                                                     is_recursive,
-                                                     is_basket,
-                                                     self.basket_path,
-                                                     self.logger)
+    def remove(self, remove_path, is_basket=True):
+        remove_handler = RemoveHandler.RemoveHandler(is_basket=is_basket,
+                                                     basket_path=self.basket_path,
+                                                     logger=self.logger)
+
         remove_handler.run_remove(remove_path)
 
-    def restore(self, name, is_force=True):
-        restore.restore(name, self.basket_path, is_force, self.logger)
+    def restore(self, name):
+        restore.restore(name_el=name, basket_path=self.basket_path, logger=self.logger)
 
     def check_basket_for_cleaning(self, is_show):
         basket_handler = BasketHandler.CheckBasketHandler(self.logger,
