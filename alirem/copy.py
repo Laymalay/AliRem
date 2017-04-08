@@ -24,7 +24,8 @@ class CopyHandler(object):
         try:
             self.copy(path, dst)
         except exception.PermissionDenied:
-            shutil.rmtree(dst)
+            if exists(dst):
+                shutil.rmtree(dst)
             raise exception.PermissionDenied
 
     def copy(self, path, dst):
