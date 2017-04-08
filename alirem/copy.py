@@ -48,7 +48,7 @@ class CopyHandler(object):
             if self.is_replace and exists(path):
                 shutil.rmtree(path)
                 mkdir(path)
-            if not exists(path) and not self.is_merge:
+            if not exists(path) and self.is_merge:
                 mkdir(path)
 
 

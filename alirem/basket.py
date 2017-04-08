@@ -53,7 +53,7 @@ class BasketHandler(object):
             new_name = self.check_in_basket(name, self.basket_path)
             dst = join(self.basket_path, new_name)
 
-            copyhandler = copy.CopyHandler(logger=self.logger,
+            copyhandler = copy.CopyHandler(logger=self.logger, is_merge=True,
                                            is_interactive=self.is_interactive,
                                            is_dryrun=self.is_dryrun, regexp=self.regexp)
 
