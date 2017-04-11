@@ -4,13 +4,14 @@ import alirem.remove as RemoveHandler
 import alirem.restore as restore
 import alirem.check_basket_for_cleaning as BasketHandler
 import alirem.logger as logger
+
 class Alirem(object):
     def __init__(self, basket_path='basket',
                  mode='size',
                  time=120, size=1000,
                  mode_for_file='info', mode_for_cmd='info',
-                 path_log='example', is_silent=False, is_force=False):
-
+                 path_log='example', is_silent=False, is_force=False, regexp=None):
+        self.regexp = regexp
         self.basket_path = basket_path
         self.mode = mode
         self.time = time
@@ -20,7 +21,8 @@ class Alirem(object):
     def remove(self, remove_path, is_basket=True):
         remove_handler = RemoveHandler.RemoveHandler(is_basket=is_basket,
                                                      basket_path=self.basket_path,
-                                                     logger=self.logger)
+                                                     logger=self.logger,
+                                                     regexp=self.regexp)
 
         remove_handler.run_remove(remove_path)
 

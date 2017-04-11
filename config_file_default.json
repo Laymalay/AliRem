@@ -13,5 +13,6 @@
     "dryrun":false,
     "interactive":false,
     "merge":false,
-    "replace":false
+    "replace":false,
+    "symlinks":false
 }

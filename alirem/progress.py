@@ -14,7 +14,6 @@ def show_progress(task, total_size, get_now_size):
     worker.start()
 
     while worker.isAlive():
-
         time.sleep(0.1)
         try:
             now_size = get_now_size()

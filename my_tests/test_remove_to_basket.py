@@ -26,18 +26,18 @@ class TestRemove(unittest.TestCase):
     def test_run_remove_empty_dir_to_basket(self):
         handler_empty_dir = RemoveHandler(is_dir=True, is_basket=True,
                                           basket_path=self.basket, logger=self.logger)
-        handler_empty_dir.run_remove(self.empty_dir_path)
+        handler_empty_dir.remove(self.empty_dir_path)
         self.assertEqual(exists(self.empty_dir_path), False)
         self.assertTrue(exists(join(self.basket, basename(self.empty_dir_path))))
     def test_run_remove_dir_to_basket(self):
         handler_dir = RemoveHandler(is_recursive=True, is_basket=True,
                                     basket_path=self.basket, logger=self.logger)
-        handler_dir.run_remove(self.dir_path)
+        handler_dir.remove(self.dir_path)
         self.assertEqual(exists(self.dir_path), False)
         self.assertTrue(exists(join(self.basket, basename(self.dir_path))))
     def test_run_remove_file_to_basket(self):
         handler_file = RemoveHandler(logger=self.logger, is_basket=True, basket_path=self.basket,)
-        handler_file.run_remove(self.file_path)
+        handler_file.remove(self.file_path)
         self.assertEqual(exists(self.file_path), False)
         self.assertTrue(exists(join(self.basket, basename(self.file_path))))
 

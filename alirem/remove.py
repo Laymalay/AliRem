@@ -2,17 +2,16 @@
 # -*- coding: UTF-8 -*-
 import logging
 import os
+import re
 import alirem.basket as basket
 import alirem.exception as exception
 import alirem.progress as progress
-import re
+
 
 class RemoveHandler(object):
-
     def __init__(self, logger, is_dir=False,
                  is_recursive=False, is_interactive=False, is_dryrun=False,
-                 is_basket=False, basket_path='basket', regexp=None):
-
+                 is_basket=False, basket_path='basket', regexp=None, symlinks=False):
         self.basket_path = basket_path
         self.is_dir = is_dir
         self.is_recursive = is_recursive
@@ -22,6 +21,30 @@ class RemoveHandler(object):
         self.is_dryrun = is_dryrun
         self.file_removed = True
         self.regexp = regexp
+        self.symlinks = symlinks
+        self.used_slinks = []
+
+
+    def remove(self, path):
+        if os.path.islink(path):
+            if self.symlinks:
+                self.go_to_link(path)
+            self.unlink(path)
+        else:
+            self._remove(path)
+
+    def unlink(self, path):
+        if not self.is_dryrun:
+            os.unlink(path)
+        self.logger.log("Symlink '{}' removed".format(path), logging.INFO)
+
+    def go_to_link(self, path):
+        inode = os.stat(path).st_ino
+        realpath = os.path.basename(os.readlink(path))
+        # os.path.relpath(os.path.abspath(os.readlink(src)))
+        if inode not in self.used_slinks:
+            self.used_slinks.append(inode)
+            self._remove(realpath)
 
     def remove_empty_dir(self, path):
         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
@@ -35,8 +58,8 @@ class RemoveHandler(object):
     def __remove_file(self, path):
         if not self.is_dryrun:
             progress.show_progress(task=lambda: os.remove(path),
-                                    total_size=os.path.getsize(path),
-                                    get_now_size=lambda: os.path.getsize(path))
+                                   total_size=os.path.getsize(path),
+                                   get_now_size=lambda: os.path.getsize(path))
 
     def __remove_empty_dir(self, path):
         if not self.is_dryrun:
@@ -60,7 +83,7 @@ class RemoveHandler(object):
         else:
             return True
 
-    def run_remove(self, path):
+    def _remove(self, path):
         if os.path.exists(path):
             if self.is_basket:
                 baskethandler = basket.BasketHandler(basket_path=self.basket_path, path=path,
@@ -69,17 +92,25 @@ class RemoveHandler(object):
                                                      logger=self.logger,
                                                      is_dryrun=self.is_dryrun,
                                                      is_interactive=self.is_interactive,
-                                                     regexp=self.regexp)
+                                                     regexp=self.regexp,
+                                                     symlinks=self.symlinks)
 
                 baskethandler.run()
-                self.remove(path)
+                self.__remove(path)
 
             else:
-                self.remove(path)
+                self.__remove(path)
         else:
-            self.logger.log("Can not find such path", logging.ERROR, exception.NoSuchPath)
+            self.logger.log("Can not find such path: {}".format(path),
+                            logging.ERROR, exception.NoSuchPath)
 
-    def remove(self, path):
+    def __remove(self, path):
+        if os.path.islink(path):
+            if self.symlinks:
+                self.go_to_link(path)
+            self.unlink(path)
+            return True
+
         if os.path.isfile(path):
             if self.check_regexp(path=path, regexp=self.regexp):
                 if self.asking('Do u want to delete this file: {}?'.format(os.path.basename(path))):
@@ -98,6 +129,7 @@ class RemoveHandler(object):
 
 
     def remove_dir(self, path):
+        print path
         if not self.is_dir and not self.is_recursive:
             self.logger.log("cannot remove '{}', it's dir".format(path),
                             logging.ERROR, exception.ItIsDirectory)
@@ -114,10 +146,10 @@ class RemoveHandler(object):
         elif self.is_recursive:
 
             for obj in os.listdir(path):
-                if not self.remove(path + "/" + obj):
+                if not self.__remove(path + "/" + obj):
                     self.file_removed = False
-
             if self.file_removed:
+
                 if len(os.listdir(path)) == 0 or self.is_dryrun:
                     if self.asking('''Do you want to delete this empty directory:
                                     {}?'''.format(os.path.basename(path))):

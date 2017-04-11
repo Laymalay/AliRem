@@ -6,7 +6,8 @@ import logging.config
 
 
 class Logger(object):
-    def __init__(self, mode_for_file, mode_for_cmd, path, is_silent, is_force):
+    def __init__(self, path, mode_for_file=None,
+                 mode_for_cmd=None, is_silent=False, is_force=False):
         self.is_silent = is_silent
         self.logger = self.setup(mode_for_cmd, path, mode_for_file)
         self.is_force = is_force

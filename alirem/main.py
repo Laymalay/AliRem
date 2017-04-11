@@ -31,6 +31,8 @@ def create_remove_parser():
     parser.add_argument('-r', '--recursive', action='store_true', help='is it not empty dir')
     parser.add_argument('-b', '--basket', action='store_true', default=None,
                         help='remove to basket')
+    parser.add_argument('-s', '--symlinks', action='store_true', default=None,
+                        help='Follow the symlinks')
     parser.add_argument('-p', '--basketpath', action='store', help='path to basket')
     parser.add_argument('--regexp', action='store', help='regexp for searching in file-tree')
     namespace = parser.parse_args()
@@ -97,7 +99,7 @@ def create_basket_parser():
 
 
 
-def sync_params(cmd, default_config, config=None):
+def update_params(cmd, default_config, config=None):
     if config is not None:
         #Overlap default_config by config
         for key, value in default_config.iteritems():
@@ -120,14 +122,16 @@ def remove():
     with open('config_file_default.json') as default_config_file:
         default_config = json.load(default_config_file)
 
-    sync_params(vars(args), default_config, config)
+    update_params(vars(args), default_config, config)
 
     if args.showparam:
         show_params(default_config)
 
-    logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
-                        default_config['logfilepath'], default_config['silent'],
-                        default_config['force'])
+    logger = log.Logger(mode_for_file=default_config['logmodefile'],
+                        mode_for_cmd=default_config['logmodecmd'],
+                        path=default_config['logfilepath'],
+                        is_silent=default_config['silent'],
+                        is_force=default_config['force'])
     try:
         remove_handler = remover.RemoveHandler(is_dir=args.dir, is_recursive=args.recursive,
                                                is_interactive=default_config['interactive'],
@@ -135,9 +139,10 @@ def remove():
                                                is_basket=default_config['basket'],
                                                logger=logger,
                                                basket_path=default_config['basketpath'],
-                                               regexp=args.regexp)
+                                               regexp=args.regexp,
+                                               symlinks=default_config['symlinks'])
         for remove_path in args.removepath:
-            remove_handler.run_remove(remove_path)
+            remove_handler.remove(remove_path)
     except exception.Error as error:
         print error.exit_code
         exit(error.exit_code)
@@ -152,17 +157,19 @@ def restore():
     with open('config_file_default.json') as default_config_file:
         default_config = json.load(default_config_file)
 
-    sync_params(vars(args), default_config, config)
+    update_params(vars(args), default_config, config)
 
     if args.showparam:
         show_params(default_config)
 
-    logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
-                        default_config['logfilepath'], default_config['silent'],
-                        default_config['force'])
+    logger = log.Logger(mode_for_file=default_config['logmodefile'],
+                        mode_for_cmd=default_config['logmodecmd'],
+                        path=default_config['logfilepath'],
+                        is_silent=default_config['silent'],
+                        is_force=default_config['force'])
     try:
         for restore_name in args.restorename:
-            restorer.restore(restore_name,
+            restorer.restore(name_el=restore_name,
                              basket_path=default_config['basketpath'],
                              logger=logger,
                              is_merge=default_config['merge'],
@@ -181,22 +188,24 @@ def basket():
     with open('config_file_default.json') as default_config_file:
         default_config = json.load(default_config_file)
 
-    sync_params(vars(args), default_config, config)
+    update_params(vars(args), default_config, config)
 
     if args.showparam:
         show_params(default_config)
 
-    logger = log.Logger(default_config['logmodefile'], default_config['logmodecmd'],
-                        default_config['logfilepath'], default_config['silent'],
-                        default_config['force'])
+    logger = log.Logger(mode_for_file=default_config['logmodefile'],
+                        mode_for_cmd=default_config['logmodecmd'],
+                        path=default_config['logfilepath'],
+                        is_silent=default_config['silent'],
+                        is_force=default_config['force'])
 
     try:
-        check_basket = CheckBasketForCleaning.CheckBasketHandler(logger,
-                                                                 default_config['show'],
-                                                                 default_config['basketpath'],
-                                                                 default_config['clearmode'],
-                                                                 default_config['deltatime'],
-                                                                 default_config['maxsize'])
+        check_basket = CheckBasketForCleaning.CheckBasketHandler(logger=logger,
+                                                                 is_show=default_config['show'],
+                                                                 basket_path=default_config['basketpath'],
+                                                                 mode=default_config['clearmode'],
+                                                                 time=default_config['deltatime'],
+                                                                 size=default_config['maxsize'])
         check_basket.check_basket_for_cleaning()
     except exception.Error as error:
         print error.exit_code

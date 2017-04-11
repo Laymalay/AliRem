@@ -3,7 +3,7 @@
 import shutil
 import os
 from os import listdir, mkdir, access, makedirs
-from os.path import join, exists, isfile, basename, isdir, dirname
+from os.path import join, exists, isfile, basename, isdir, dirname, islink
 import logging
 import alirem.progress as progress
 import alirem.exception as exception
@@ -11,7 +11,7 @@ import re
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
-                 is_dryrun=False, is_interactive=False, regexp=None):
+                 is_dryrun=False, is_interactive=False, regexp=None, symlinks=False):
         self.logger = logger
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
@@ -19,6 +19,7 @@ class CopyHandler(object):
         self.is_merge = is_merge
         self.is_replace = is_replace
         self.regexp = regexp
+        self.symlinks = symlinks
 
     def run(self, path, dst):
         try:
@@ -29,17 +30,21 @@ class CopyHandler(object):
             raise exception.PermissionDenied
 
     def copy(self, path, dst):
-        if isfile(path):
-            if self.copy_file(path, dst):
-                return True
-            else:
-                return False
-        if isdir(path):
-            if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
-                self.copy_dir(path, dst)
-                return True
-            else:
-                return False
+        if islink(path) and not self.symlinks:
+            self.copy_symlink(path, dst)
+            return True
+        if not islink(path):
+            if isfile(path):
+                if self.copy_file(path, dst):
+                    return True
+                else:
+                    return False
+            if isdir(path):
+                if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
+                    self.copy_dir(path, dst)
+                    return True
+                else:
+                    return False
 
     def create_dir(self, path):
         if not self.is_dryrun:
@@ -51,7 +56,7 @@ class CopyHandler(object):
                 shutil.rmtree(path)
                 mkdir(path)
                 return
-            if self.is_merge and not exists(path):
+            if not exists(path) and self.is_merge:
                 mkdir(path)
                 return
             if not exists(path):
@@ -91,14 +96,22 @@ class CopyHandler(object):
                                    total_size=os.path.getsize(path),
                                    get_now_size=lambda: os.path.getsize(dst))
 
+
+
+    def copy_symlink(self, src, dst):
+        dest = os.path.dirname(dst)
+        if not os.path.exists(dest):
+            os.makedirs(dest)
+        linkto = os.path.relpath(os.path.abspath(os.readlink(src)))
+        print linkto
+        os.symlink(linkto, dst)
+        self.logger.log("Copy symlink \'{}\', to \'{}\'".format(src, dst), logging.INFO)
+
     def asking(self, msg):
         if self.is_interactive:
             print msg+'\n'
             answer = raw_input('[Y/n]\n')
-            if answer != "n":
-                return True
-            else:
-                return False
+            return answer !="n"
         else:
             return True
 

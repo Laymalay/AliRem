@@ -8,7 +8,6 @@ import alirem.basket_list as basketlist
 import alirem.copy as copy
 
 def restore(name_el, basket_path, logger, is_merge=True, is_replace=False):
-
     basket_list = basketlist.BasketList()
     basket_list.load()
     index_name = join(basket_path, name_el)
