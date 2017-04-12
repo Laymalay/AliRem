@@ -30,6 +30,7 @@ def show_progress(task, total_size, get_now_size):
             a = t.green
 
 
-        print a("{}{}|{}".format("#" * progress, " " * (PROGRESS_SIZE - progress), "\033[F"))
-    print t.green("{}|{}".format("#" * 100, "\033[F"))
+        print a("{}{}|{}%{}".format("#" * progress, "." * (PROGRESS_SIZE - progress),
+                                    progress, "\033[F"))
+    print t.green("{}|100%{}".format("#" * 100, "\033[F"))
     print

@@ -4,7 +4,6 @@ import shutil
 import os
 from os import listdir, mkdir, access, makedirs
 from os.path import join, exists, isfile, basename, isdir, dirname
-import re
 import logging
 import datetime
 import alirem.basket_list as basketlist
@@ -17,7 +16,7 @@ class BasketHandler(object):
                  regexp=None, is_dir=False,
                  is_recursive=False,
                  basket_path='basket',
-                 is_dryrun=False, is_interactive=False, symlinks=False):
+                 is_dryrun=False, is_interactive=False, symlinks=False, is_progress=True):
         self.basket_path = basket_path
         self.path = path
         self.is_dir = is_dir
@@ -28,6 +27,7 @@ class BasketHandler(object):
         self.file_copied = True
         self.regexp = regexp
         self.symlinks = symlinks
+        self.is_progress = is_progress
 
     def check_access_for_dir(self, path):
         if isdir(path):
@@ -40,7 +40,7 @@ class BasketHandler(object):
         else:
             return True
 
-    def run(self):
+    def move_to_basket(self):
 
         if not exists(self.basket_path):
             mkdir(self.basket_path)
@@ -58,7 +58,8 @@ class BasketHandler(object):
             copyhandler = copy.CopyHandler(logger=self.logger, is_merge=True,
                                            is_interactive=self.is_interactive,
                                            is_dryrun=self.is_dryrun,
-                                           regexp=self.regexp, symlinks=self.symlinks)
+                                           regexp=self.regexp, symlinks=self.symlinks,
+                                           is_progress=self.is_progress)
 
             copyhandler.run(self.path, dst)
 

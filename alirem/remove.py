@@ -10,7 +10,8 @@ import alirem.progress as progress
 class RemoveHandler(object):
     def __init__(self, logger=None, is_dir=False,
                  is_recursive=False, is_interactive=False, is_dryrun=False,
-                 is_basket=False, basket_path='basket', regexp=None, symlinks=False):
+                 is_basket=False, basket_path='basket', regexp=None,
+                 symlinks=False, is_progress=True):
         self.basket_path = basket_path
         self.is_dir = is_dir
         self.is_recursive = is_recursive
@@ -22,6 +23,7 @@ class RemoveHandler(object):
         self.regexp = regexp
         self.symlinks = symlinks
         self.used_slinks = []
+        self.is_progress = is_progress
 
     def remove(self, path):
         if os.path.islink(path):
@@ -55,9 +57,12 @@ class RemoveHandler(object):
 
     def __remove_file(self, path):
         if not self.is_dryrun:
-            progress.show_progress(task=lambda: os.remove(path),
-                                   total_size=os.path.getsize(path),
-                                   get_now_size=lambda: os.path.getsize(path))
+            if self.is_progress:
+                progress.show_progress(task=lambda: os.remove(path),
+                                       total_size=os.path.getsize(path),
+                                       get_now_size=lambda: os.path.getsize(path))
+            else:
+                os.remove(path)
 
     def __remove_empty_dir(self, path):
         if not self.is_dryrun:
@@ -91,9 +96,10 @@ class RemoveHandler(object):
                                                             is_dryrun=self.is_dryrun,
                                                             is_interactive=self.is_interactive,
                                                             regexp=self.regexp,
-                                                            symlinks=self.symlinks)
+                                                            symlinks=self.symlinks,
+                                                            is_progress=self.is_progress)
 
-                baskethandler.run()
+                baskethandler.move_to_basket()
                 self.__remove(path)
 
             else:

@@ -39,7 +39,10 @@ def create_parser(mode=REMOVE):
         parser.add_argument('-s', '--symlinks', action='store_true', default=None,
                             help='Follow the symlinks')
         parser.add_argument('-p', '--basketpath', action='store', help='path to basket')
+        parser.add_argument('-g', '--progress', action='store_true',
+                            help='show progress', default=None)
         parser.add_argument('--regexp', action='store', help='regexp for searching in file-tree')
+
     if mode == RESTORE:
         parser.add_argument('restorename', nargs='+')
         parser.add_argument('-p', '--basketpath', action='store', help='path to basket')
@@ -47,6 +50,8 @@ def create_parser(mode=REMOVE):
                             help='merge directores')
         parser.add_argument('-r', '--replace', action='store_true', default=None,
                             help='replace existing files')
+        parser.add_argument('-g', '--progress', action='store_true',
+                            help='show progress', default=None)
     if mode == CLEAN_BASKET:
         parser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'],
                             help='cleaning mode for basket')
@@ -89,7 +94,7 @@ def clean_basket():
     main(CLEAN_BASKET)
 def show_basket_list():
     main(SHOW_BASKET_LIST)
-def show_default_config():
+def show_config():
     main(GET_CONFIG)
 
 
@@ -129,10 +134,12 @@ def main(mode=REMOVE):
                           is_basket=default_config['basket'],
                           basket_path=default_config['basketpath'],
                           regexp=args.regexp,
-                          symlinks=default_config['symlinks'])
+                          symlinks=default_config['symlinks'],
+                          is_progress=default_config['progress'])
         if mode == RESTORE:
             alirem.restore(restorenames=args.restorename, basket_path='basket',
-                           is_merge=default_config['merge'], is_replace=default_config['replace'])
+                           is_merge=default_config['merge'], is_replace=default_config['replace'],
+                           is_progress=default_config['progress'])
 
         if mode == CLEAN_BASKET:
             alirem.check_basket_for_cleaning(is_show=default_config['show'],

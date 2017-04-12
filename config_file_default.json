@@ -14,5 +14,6 @@
     "interactive":false,
     "merge":false,
     "replace":false,
-    "symlinks":false
+    "symlinks":false,
+    "progress":false
 }

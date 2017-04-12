@@ -2,16 +2,18 @@
 # -*- coding: UTF-8 -*-
 import shutil
 import os
+import re
 from os import listdir, mkdir, access, makedirs
 from os.path import join, exists, isfile, basename, isdir, dirname, islink
 import logging
 import alirem.progress as progress
 import alirem.exception as exception
-import re
+
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
-                 is_dryrun=False, is_interactive=False, regexp=None, symlinks=False):
+                 is_dryrun=False, is_interactive=False, regexp=None,
+                 symlinks=False, is_progress=True):
         self.logger = logger
         self.is_interactive = is_interactive
         self.is_dryrun = is_dryrun
@@ -20,6 +22,7 @@ class CopyHandler(object):
         self.is_replace = is_replace
         self.regexp = regexp
         self.symlinks = symlinks
+        self.is_progress = is_progress
 
     def run(self, path, dst):
         try:
@@ -92,16 +95,18 @@ class CopyHandler(object):
 
     def __copy_file(self, path, dst):
         if not self.is_dryrun:
-            progress.show_progress(task=lambda: shutil.copyfile(path, dst),
-                                   total_size=os.path.getsize(path),
-                                   get_now_size=lambda: os.path.getsize(dst))
-
+            if self.is_progress:
+                progress.show_progress(task=lambda: shutil.copyfile(path, dst),
+                                       total_size=os.path.getsize(path),
+                                       get_now_size=lambda: os.path.getsize(dst))
+            else:
+                shutil.copyfile(path, dst)
 
 
     def copy_symlink(self, src, dst):
         dest = os.path.dirname(dst)
         if not os.path.exists(dest):
-            os.makedirs(dest)
+            makedirs(dest)
         os.chdir(dirname(dst))
         linkto = os.path.relpath(os.readlink(src))
         # os.path.basename(os.path.relpath(os.path.abspath(os.readlink(src))))
