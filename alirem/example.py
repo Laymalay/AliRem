@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import alirem._alirem as alirem
+import alirem.Alirem as alirem
 
 
 

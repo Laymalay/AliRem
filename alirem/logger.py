@@ -4,6 +4,16 @@ import logging
 import logging.config
 
 
+class DefaultLogger(object):
+    def __init__(self, is_force=False):
+        self.logger = self.setup()
+        self.is_force = is_force
+    def log(self, msg=None, level=None, error=None):
+        if error is not None and not self.is_force:
+            raise error()
+    def setup(self):
+        logger = logging.getLogger('DefaultLogger')
+        return logger
 
 class Logger(object):
     def __init__(self, path, mode_for_file=None,

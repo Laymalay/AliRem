@@ -31,12 +31,7 @@ class TestRemove(unittest.TestCase):
         handler_empty_dir.remove(self.empty_dir_path)
         self.assertEqual(exists(self.empty_dir_path), False)
         self.assertTrue(exists(join(self.basket, basename(self.empty_dir_path))))
-
-        # check_basket = CheckBasketForCleaning.CheckBasketHandler(self.logger,
-        #                                                          True,
-        #                                                          self.basket)
-        # check_basket.check_basket_for_cleaning()
-        restorehandler.restore(name_el=basename(self.empty_dir_path),
+        restorehandler.restore(basename(self.empty_dir_path),
                                basket_path=self.basket,
                                logger=self.logger,
                                is_replace=True)

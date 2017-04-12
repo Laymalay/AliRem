@@ -1,17 +1,17 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from os.path import join, exists, isfile, basename, isdir, dirname
+from os.path import join, exists, isfile, dirname
 from os import remove, makedirs
 import logging
 import shutil
 import alirem.basket_list as basketlist
 import alirem.copy as copy
 
-def restore(name_el, basket_path, logger, is_merge=True, is_replace=False):
+def restore(name, basket_path, logger, is_merge=True, is_replace=False):
     basket_list = basketlist.BasketList()
     basket_list.load()
-    index_name = join(basket_path, name_el)
-    element = basket_list.search(name_el, basket_path)
+    index_name = join(basket_path, name)
+    element = basket_list.search(name, basket_path)
     if element is not None:
         if not exists(dirname(element.rm_path)):
             makedirs(dirname(element.rm_path))
@@ -28,7 +28,7 @@ def restore(name_el, basket_path, logger, is_merge=True, is_replace=False):
         basket_list.remove(element)
 
     else:
-        logger.log("Cannot find such file {} in basket".format(name_el), logging.WARNING)
+        logger.log("Cannot find such file {} in basket".format(name), logging.WARNING)
         basket_list.save()
 
 

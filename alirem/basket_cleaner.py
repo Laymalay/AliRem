@@ -18,12 +18,16 @@ class CheckBasketHandler(object):
         self.size = size
         self.basket_list = b_list.BasketList()
         self.basket_list.load()
-    def show_basket(self, basket_list):
+
+    def show_basket(self):
         if self.is_show:
-            basket_list.show()
+            self.basket_list.show()
+
+    def get_objects_in_basket(self):
+        return self.basket_list.get_list_of_objects_in_basket()
 
     def check_basket_for_cleaning(self):
-        self.show_basket(self.basket_list)
+        self.show_basket()
         if exists(self.basket_path):
 
             if self.mode == 'size':

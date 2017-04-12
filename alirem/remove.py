@@ -3,13 +3,12 @@
 import logging
 import os
 import re
-import alirem.basket as basket
+import alirem.basket_handler as BasketHandler
 import alirem.exception as exception
 import alirem.progress as progress
 
-
 class RemoveHandler(object):
-    def __init__(self, logger, is_dir=False,
+    def __init__(self, logger=None, is_dir=False,
                  is_recursive=False, is_interactive=False, is_dryrun=False,
                  is_basket=False, basket_path='basket', regexp=None, symlinks=False):
         self.basket_path = basket_path
@@ -23,7 +22,6 @@ class RemoveHandler(object):
         self.regexp = regexp
         self.symlinks = symlinks
         self.used_slinks = []
-
 
     def remove(self, path):
         if os.path.islink(path):
@@ -86,14 +84,14 @@ class RemoveHandler(object):
     def _remove(self, path):
         if os.path.exists(path):
             if self.is_basket:
-                baskethandler = basket.BasketHandler(basket_path=self.basket_path, path=path,
-                                                     is_dir=self.is_dir,
-                                                     is_recursive=self.is_recursive,
-                                                     logger=self.logger,
-                                                     is_dryrun=self.is_dryrun,
-                                                     is_interactive=self.is_interactive,
-                                                     regexp=self.regexp,
-                                                     symlinks=self.symlinks)
+                baskethandler = BasketHandler.BasketHandler(basket_path=self.basket_path, path=path,
+                                                            is_dir=self.is_dir,
+                                                            is_recursive=self.is_recursive,
+                                                            logger=self.logger,
+                                                            is_dryrun=self.is_dryrun,
+                                                            is_interactive=self.is_interactive,
+                                                            regexp=self.regexp,
+                                                            symlinks=self.symlinks)
 
                 baskethandler.run()
                 self.__remove(path)

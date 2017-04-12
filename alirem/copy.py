@@ -102,8 +102,10 @@ class CopyHandler(object):
         dest = os.path.dirname(dst)
         if not os.path.exists(dest):
             os.makedirs(dest)
-        linkto = os.path.relpath(os.path.abspath(os.readlink(src)))
-        print linkto
+        os.chdir(dirname(dst))
+        linkto = os.path.relpath(os.readlink(src))
+        # os.path.basename(os.path.relpath(os.path.abspath(os.readlink(src))))
+        print linkto+ "|dst-->"+dst + "|src-->"+src
         os.symlink(linkto, dst)
         self.logger.log("Copy symlink \'{}\', to \'{}\'".format(src, dst), logging.INFO)
 
@@ -111,7 +113,7 @@ class CopyHandler(object):
         if self.is_interactive:
             print msg+'\n'
             answer = raw_input('[Y/n]\n')
-            return answer !="n"
+            return answer != "n"
         else:
             return True
 
