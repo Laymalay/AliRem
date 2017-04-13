@@ -1,0 +1,12 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/xenial64"
+  config.vm.provision "file", source: "../alirem", destination: "alirem"
+  config.vm.provision "file", source: "../setup.py", destination: "setup.py"
+  config.vm.provision "file", source: "../requirements.txt", destination: "requirements.txt"
+  config.vm.provision "file", source: "../README.txt", destination: "README.txt"
+  config.vm.provision "shell",
+        inline: "sudo apt -y update && sudo apt install -y python python-pip && sudo pip install setuptools && sudo ./setup.py install"
+end
