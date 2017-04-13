@@ -1,16 +1,21 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import json
+import os
 import argparse
+
+import json
+import toml
+
 import alirem.logger as log
 import alirem.exception as exception
 import alirem.alirm as Alirem
+
 
 REMOVE = 1
 RESTORE = 2
 SHOW_BASKET_LIST = 3
 CLEAN_BASKET = 4
-GET_CONFIG = 5
+GET_DEFAULT_CONFIG = 5
 
 def create_parser(mode=REMOVE):
     parser = argparse.ArgumentParser()
@@ -19,6 +24,8 @@ def create_parser(mode=REMOVE):
     parser.add_argument('-i', '--interactive', action='store_true', default=None)
     parser.add_argument('-f', '--force', action='store_true', default=None)
     parser.add_argument('--configfile', action='store', help='path to config file')
+    parser.add_argument('-j', '--json', action='store_true',
+                        default=None, help='format json for config file')
     parser.add_argument('--logfilepath', action='store',
                         help='path to logging file without file extension')
     parser.add_argument('--silent', action='store_true', default=None,
@@ -36,7 +43,7 @@ def create_parser(mode=REMOVE):
         parser.add_argument('-r', '--recursive', action='store_true', help='is it not empty dir')
         parser.add_argument('-b', '--basket', action='store_true', default=None,
                             help='remove to basket')
-        parser.add_argument('-s', '--symlinks', action='store_true', default=None,
+        parser.add_argument('--symlinks', action='store_true', default=None,
                             help='Follow the symlinks')
         parser.add_argument('-p', '--basketpath', action='store', help='path to basket')
         parser.add_argument('-g', '--progress', action='store_true',
@@ -66,7 +73,7 @@ def create_parser(mode=REMOVE):
 
     if mode == SHOW_BASKET_LIST:
         pass
-    if mode == GET_CONFIG:
+    if mode == GET_DEFAULT_CONFIG:
         pass
 
     namespace = parser.parse_args()
@@ -95,13 +102,76 @@ def clean_basket():
 def show_basket_list():
     main(SHOW_BASKET_LIST)
 def show_config():
-    main(GET_CONFIG)
+    main(GET_DEFAULT_CONFIG)
 
 
-def load_config_file(path):
+def get_defaultconfig_json():
+    return  '''
+{
+    "clearmode":"size",
+    "deltatime": 120,
+    "maxsize":100,
+    "basketpath":"basket",
+    "basket":false,
+    "force":false,
+    "logmodecmd":"INFO",
+    "logmodefile":null,
+    "logfilepath":"alirem",
+    "silent":false,
+    "show":true,
+    "dryrun":false,
+    "interactive":false,
+    "merge":false,
+    "replace":false,
+    "symlinks":false,
+    "progress":false
+}
+'''
+def get_defaultconfig_toml():
+    return '''
+    clearmode="size"
+    deltatime= 120
+    maxsize=100
+    basketpath="basket"
+    basket=false
+    force=false
+    logmodecmd="INFO"
+    logmodefile=null
+    logfilepath="alirem"
+    silent=false
+    show=true
+    dryrun=false
+    interactive=false
+    merge=false
+    replace=false
+    symlinks=false
+    progress=false
+    '''
+def load_defaultconfig_file_json(path):
+    if not os.path.exists(path):
+        with open(path, "w") as config_file:
+            config_file.write(get_defaultconfig_json())
+    with open(path) as config_file:
+        return json.load(config_file)
+
+def load_defaultconfig_file_toml(path):
+    if not os.path.exists(path):
+        with open(path, "w") as config_file:
+            config_file.write(get_defaultconfig_toml())
+    with open(path) as config_file:
+        return toml.load(config_file)
+
+def load_config_file_json(path):
     if path is not None:
         with open(path) as config:
             return json.load(config)
+    else:
+        return None
+
+def load_config_file_toml(path):
+    if path is not None:
+        with open(path) as config:
+            return toml.load(config)
     else:
         return None
 
@@ -119,12 +189,17 @@ def get_logger(config):
 
 def main(mode=REMOVE):
     args = create_parser(mode)
-    config = load_config_file(args.configfile)
-    default_config = load_config_file('config_file_default.json')
+    if args.json:
+        config = load_config_file_json(args.configfile)
+    else:
+        config = load_config_file_toml(args.configfile)
+    # default_config = load_defaultconfig_file_toml('config_file_default.toml')
+    default_config = load_defaultconfig_file_json('config_file_default.json')
     update_params(vars(args), default_config, config)
     logger = get_logger(default_config)
     alirem = Alirem.Alirem(logger=logger)
-
+    if args.showparam:
+        show_params(default_config)
     def run():
         if mode == REMOVE:
             for path in args.removepath:
@@ -152,11 +227,17 @@ def main(mode=REMOVE):
                                              size=default_config['maxsize'])
         if mode == SHOW_BASKET_LIST:
             alirem.show_basket_list()
-        if mode == GET_CONFIG:
-            show_params(default_config)
+        if mode == GET_DEFAULT_CONFIG:
+            if args.json:
+                print get_defaultconfig_json()
+            else:
+                print get_defaultconfig_toml()
 
     try:
         run()
     except exception.Error as error:
         print error.exit_code
         exit(error.exit_code)
+
+if __name__ == '__main__':
+    main()

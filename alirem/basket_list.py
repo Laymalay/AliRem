@@ -34,17 +34,19 @@ class BasketList(object):
         self.list_of_objects_in_basket.append(el)
 
     def load(self):
-        with open('basket_list.pickle', 'rb') as f:
-            if os.path.getsize('basket_list.pickle') > 0:
-                self.list_of_objects_in_basket = pickle.load(f)
-            else:
-                self.list_of_objects_in_basket = []
-            tmp_arr = []
-            for el in self.list_of_objects_in_basket:
-                if exists(el.index_in_basket):
-                    tmp_arr.append(el)
-            self.list_of_objects_in_basket = tmp_arr
-
+        if not os.path.exists('basket_list.pickle'):
+            open('basket_list.pickle', 'wb')
+        else:
+            with open('basket_list.pickle', 'rb') as f:
+                if os.path.getsize('basket_list.pickle') > 0:
+                    self.list_of_objects_in_basket = pickle.load(f)
+                else:
+                    self.list_of_objects_in_basket = []
+                tmp_arr = []
+                for el in self.list_of_objects_in_basket:
+                    if exists(el.index_in_basket):
+                        tmp_arr.append(el)
+                self.list_of_objects_in_basket = tmp_arr
     def save(self):
         with open('basket_list.pickle', 'wb') as f:
             pickle.dump(self.list_of_objects_in_basket, f)

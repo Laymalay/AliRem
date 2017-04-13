@@ -5,7 +5,7 @@ vagrant up
 ```
 ## SSH in to VM ##
 ```
-vagrant ssh
+vagrant ssh 
 ```  
 ## Install/Reinstall tool in VM ##
 ```

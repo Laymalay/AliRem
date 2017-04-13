@@ -1,0 +1,10 @@
+__init__.py
+core.egg*
+dist
+env
+build
+*.pyc
+*.log
+launch.json
+basket_list.pickle
+basket/*

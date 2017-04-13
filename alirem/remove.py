@@ -133,7 +133,6 @@ class RemoveHandler(object):
 
 
     def remove_dir(self, path):
-        print path
         if not self.is_dir and not self.is_recursive:
             self.logger.log("cannot remove '{}', it's dir".format(path),
                             logging.ERROR, exception.ItIsDirectory)

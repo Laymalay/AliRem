@@ -11,7 +11,7 @@ setup(
     version='1.0',
     install_requires=install_requirements,
     packages=find_packages(),
-    long_description=open(join(dirname(__file__), 'README.txt')).read(),
+    long_description=open(join(dirname(__file__), 'README.md')).read(),
     test_suite='my_tests.test_remove',
 
     entry_points={

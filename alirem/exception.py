@@ -22,4 +22,3 @@ class DirectoryExists(Error):
     exit_code = 108
 class NoSuchFileInBasket(Error):
     exit_code = 109
-    
