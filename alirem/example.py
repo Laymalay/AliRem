@@ -1,12 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import Alirem as Alirem
+
+import alirem.alirm as Alirem
 
 
 
 rm = Alirem.Alirem()
-rm.remove('file')
+rm.remove('file', is_basket=True)
 rm.check_basket_for_cleaning(is_show=True)
-rm.show_basket_list()
 rm.restore('file')
+rm.show_basket_list()
+
 

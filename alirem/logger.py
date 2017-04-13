@@ -11,6 +11,7 @@ class DefaultLogger(object):
     def log(self, msg=None, level=None, error=None):
         if error is not None and not self.is_force:
             raise error()
+
     def setup(self):
         logger = logging.getLogger('DefaultLogger')
         return logger

@@ -4,7 +4,7 @@ import json
 import argparse
 import alirem.logger as log
 import alirem.exception as exception
-import alirem.Alirem as Alirem
+import alirem.alirm as Alirem
 
 REMOVE = 1
 RESTORE = 2
@@ -127,19 +127,22 @@ def main(mode=REMOVE):
 
     def run():
         if mode == REMOVE:
-            alirem.remove(path=args.removepath, is_dir=args.dir,
-                          is_recursive=args.recursive,
-                          is_interactive=default_config['interactive'],
-                          is_dryrun=default_config['dryrun'],
-                          is_basket=default_config['basket'],
-                          basket_path=default_config['basketpath'],
-                          regexp=args.regexp,
-                          symlinks=default_config['symlinks'],
-                          is_progress=default_config['progress'])
+            for path in args.removepath:
+                alirem.remove(path=path, is_dir=args.dir,
+                              is_recursive=args.recursive,
+                              is_interactive=default_config['interactive'],
+                              is_dryrun=default_config['dryrun'],
+                              is_basket=default_config['basket'],
+                              basket_path=default_config['basketpath'],
+                              regexp=args.regexp,
+                              symlinks=default_config['symlinks'],
+                              is_progress=default_config['progress'])
         if mode == RESTORE:
-            alirem.restore(restorenames=args.restorename, basket_path='basket',
-                           is_merge=default_config['merge'], is_replace=default_config['replace'],
-                           is_progress=default_config['progress'])
+            for path in args.restorename:
+                alirem.restore(restorename=path, basket_path='basket',
+                               is_merge=default_config['merge'],
+                               is_replace=default_config['replace'],
+                               is_progress=default_config['progress'])
 
         if mode == CLEAN_BASKET:
             alirem.check_basket_for_cleaning(is_show=default_config['show'],
