@@ -25,6 +25,11 @@ class CopyHandler(object):
         self.is_progress = is_progress
 
     def run(self, path, dst):
+        if os.path.abspath(path) == dirname(os.path.abspath(dst)):
+            self.logger.log("Please, do not move  <{}> to <{}>".format(basename(path),
+                                                                       basename(dst)),
+                            logging.ERROR, exception.Error)
+
         try:
             self.copy(path, dst)
         except exception.PermissionDenied:

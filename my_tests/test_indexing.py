@@ -7,8 +7,9 @@ from os.path import join, exists, basename
 from os import mkdir, makedirs
 from alirem.remove import RemoveHandler
 import alirem.logger as log
+from alirem.logger import DefaultLogger
 
-class TestRemove(unittest.TestCase):
+class TestIndexingInBasket(unittest.TestCase):
     testbead_path = "testbead"
     basket = join(testbead_path, "basket")
     empty_dir_path = join(testbead_path, "empty_dir")
@@ -19,9 +20,9 @@ class TestRemove(unittest.TestCase):
     dir_path_in_basket = join(basket, "dir")
     file_path_in_basket = join(basket, "file")
 
-    logger = log.Logger(mode_for_file='info', mode_for_cmd='info',
-                        path='test', is_silent=False, is_force=False)
-
+    # logger = log.Logger(mode_for_file='info', mode_for_cmd='info',
+    #                     path='test', is_silent=False, is_force=False)
+    logger = DefaultLogger()
     def setUp(self):
 
         mkdir(self.testbead_path)

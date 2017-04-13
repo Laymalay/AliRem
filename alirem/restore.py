@@ -7,7 +7,7 @@ import shutil
 import alirem.basket_list as basketlist
 import alirem.copy as copy
 
-def restore(name, basket_path, logger, is_merge=True, is_replace=False, is_progress=True):
+def restore(name, basket_path, logger, is_merge=True, is_replace=False, is_progress=False):
     basket_list = basketlist.BasketList()
     basket_list.load()
     index_name = join(basket_path, name)

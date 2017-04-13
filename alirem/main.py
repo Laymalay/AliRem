@@ -1,15 +1,12 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import os
-import argparse
 
-import json
-import toml
+import argparse
 
 import alirem.logger as log
 import alirem.exception as exception
 import alirem.alirm as Alirem
-
+import alirem.get_config as getconfig
 
 REMOVE = 1
 RESTORE = 2
@@ -105,82 +102,13 @@ def show_config():
     main(GET_DEFAULT_CONFIG)
 
 
-def get_defaultconfig_json():
-    return  '''
-{
-    "clearmode":"size",
-    "deltatime": 120,
-    "maxsize":100,
-    "basketpath":"basket",
-    "basket":false,
-    "force":false,
-    "logmodecmd":"INFO",
-    "logmodefile":null,
-    "logfilepath":"alirem",
-    "silent":false,
-    "show":true,
-    "dryrun":false,
-    "interactive":false,
-    "merge":false,
-    "replace":false,
-    "symlinks":false,
-    "progress":false
-}
-'''
-def get_defaultconfig_toml():
-    return '''
-    clearmode="size"
-    deltatime= 120
-    maxsize=100
-    basketpath="basket"
-    basket=false
-    force=false
-    logmodecmd="INFO"
-    logmodefile=null
-    logfilepath="alirem"
-    silent=false
-    show=true
-    dryrun=false
-    interactive=false
-    merge=false
-    replace=false
-    symlinks=false
-    progress=false
-    '''
-def load_defaultconfig_file_json(path):
-    if not os.path.exists(path):
-        with open(path, "w") as config_file:
-            config_file.write(get_defaultconfig_json())
-    with open(path) as config_file:
-        return json.load(config_file)
-
-def load_defaultconfig_file_toml(path):
-    if not os.path.exists(path):
-        with open(path, "w") as config_file:
-            config_file.write(get_defaultconfig_toml())
-    with open(path) as config_file:
-        return toml.load(config_file)
-
-def load_config_file_json(path):
-    if path is not None:
-        with open(path) as config:
-            return json.load(config)
-    else:
-        return None
-
-def load_config_file_toml(path):
-    if path is not None:
-        with open(path) as config:
-            return toml.load(config)
-    else:
-        return None
 
 def show_params(default_config):
     for key, value in default_config.iteritems():
         print key+':'+str(value)
 
 def get_logger(config):
-    return log.Logger(mode_for_file=config['logmodefile'],
+    return log.Logger(mode_for_file=config.get('logmodefile'),
                       mode_for_cmd=config['logmodecmd'],
                       path=config['logfilepath'],
                       is_silent=config['silent'],
@@ -190,11 +118,12 @@ def get_logger(config):
 def main(mode=REMOVE):
     args = create_parser(mode)
     if args.json:
-        config = load_config_file_json(args.configfile)
+        config = getconfig.load_config_file_json(args.configfile)
+        default_config = getconfig.load_defaultconfig_file_json('config_file_default.json')
     else:
-        config = load_config_file_toml(args.configfile)
-    # default_config = load_defaultconfig_file_toml('config_file_default.toml')
-    default_config = load_defaultconfig_file_json('config_file_default.json')
+        config = getconfig.load_config_file_toml(args.configfile)
+        default_config = getconfig.load_defaultconfig_file_toml('config_file_default.toml')
+
     update_params(vars(args), default_config, config)
     logger = get_logger(default_config)
     alirem = Alirem.Alirem(logger=logger)
@@ -229,9 +158,9 @@ def main(mode=REMOVE):
             alirem.show_basket_list()
         if mode == GET_DEFAULT_CONFIG:
             if args.json:
-                print get_defaultconfig_json()
+                print getconfig.get_defaultconfig_json()
             else:
-                print get_defaultconfig_toml()
+                print getconfig.get_defaultconfig_toml()
 
     try:
         run()

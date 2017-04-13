@@ -7,15 +7,16 @@ from os.path import join, exists
 from os import mkdir, makedirs
 from alirem.remove import RemoveHandler
 import alirem.logger as log
+from alirem.logger import DefaultLogger
 
 class TestRemove(unittest.TestCase):
     testbead_path = "testbead"
     empty_dir_path = join(testbead_path, "empty_dir")
     file_path = join(testbead_path, "file")
     dir_path = join(testbead_path, "dir")
-    logger = log.Logger(mode_for_file='info', mode_for_cmd='info',
-                        path='test', is_silent=False, is_force=False)
-
+    # logger = log.Logger(mode_for_file='info', mode_for_cmd='info',
+    #                     path='test', is_silent=False, is_force=False)
+    logger = DefaultLogger()
     def setUp(self):
         mkdir(self.testbead_path)
         mkdir(self.empty_dir_path)

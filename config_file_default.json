@@ -15,5 +15,6 @@
     "merge":false,
     "replace":false,
     "symlinks":false,
-    "progress":false
+    "progress":false,
+    "json":false
 }
