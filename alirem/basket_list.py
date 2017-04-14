@@ -44,7 +44,7 @@ class BasketList(object):
                     self.list_of_objects_in_basket = []
                 tmp_arr = []
                 for el in self.list_of_objects_in_basket:
-                    if exists(el.index_in_basket):
+                    if exists(el.index_in_basket) or os.path.islink(el.index_in_basket):
                         tmp_arr.append(el)
                 self.list_of_objects_in_basket = tmp_arr
     def save(self):

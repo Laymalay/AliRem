@@ -1,21 +1,22 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from os import listdir
-from os.path import join, isfile, getsize, isdir
+from os.path import join, isfile, getsize, isdir, islink, exists
 
 
 def get_dir_size(directory):
     total_size = 0
-    for item in listdir(directory):
-        itempath = join(directory, item)
-        if isfile(itempath):
-            total_size += getsize(itempath)
-        elif isdir(itempath):
-            total_size += get_dir_size(itempath)
+    if exists(directory):
+        for item in listdir(directory):
+            itempath = join(directory, item)
+            if isfile(itempath):
+                total_size += getsize(itempath)
+            elif isdir(itempath):
+                total_size += get_dir_size(itempath)
     return total_size
-
 def get_size(path):
-
+    if islink(path):
+        return
     size = 0
     if isfile(path):
         return getsize(path)

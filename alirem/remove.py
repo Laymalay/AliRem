@@ -7,6 +7,7 @@ import alirem.basket_handler as BasketHandler
 import alirem.exception as exception
 import alirem.progress as progress
 
+
 class RemoveHandler(object):
     def __init__(self, logger=None, is_dir=False,
                  is_recursive=False, is_interactive=False, is_dryrun=False,
@@ -29,29 +30,37 @@ class RemoveHandler(object):
         if os.path.islink(path):
             if self.symlinks:
                 self.go_to_link(path)
+            elif self.is_basket:
+                BasketHandler_link = BasketHandler.BasketHandler(logger=self.logger,
+                                                                 basket_path=self.basket_path,
+                                                                 is_dryrun=self.is_dryrun,
+                                                                 is_progress=self.is_progress,
+                                                                 path=path)
+                BasketHandler_link.move_to_basket()
             self.unlink(path)
         else:
             self._remove(path)
 
     def unlink(self, path):
         if not self.is_dryrun:
-            os.unlink(path)
-        self.logger.log("Symlink '{}' removed".format(path), logging.INFO)
+            if os.path.exists(path):
+                os.unlink(path)
+        self.logger.log("Symlink <{}> removed".format(path), logging.INFO)
 
     def go_to_link(self, path):
         inode = os.stat(path).st_ino
-        realpath = os.path.basename(os.readlink(path))
+        # realpath = os.path.abspath(os.readlink(path))
         # os.path.relpath(os.path.abspath(os.readlink(src)))
         if inode not in self.used_slinks:
             self.used_slinks.append(inode)
-            self._remove(realpath)
+            self._remove(path)
 
     def remove_empty_dir(self, path):
         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
             self.__remove_empty_dir(path)
             return True
         else:
-            self.logger.log("Permission Denied rm",
+            self.logger.log("Permission denied",
                             logging.ERROR, exception.PermissionDenied)
             return False
 
@@ -74,7 +83,7 @@ class RemoveHandler(object):
             self.__remove_file(path)
             return True
         else:
-            self.logger.log("Permission Denied rm",
+            self.logger.log("Permission Denied",
                             logging.ERROR, exception.PermissionDenied)
             return False
 
@@ -105,7 +114,7 @@ class RemoveHandler(object):
             else:
                 self.__remove(path)
         else:
-            self.logger.log("Can not find such path: {}".format(path),
+            self.logger.log("Can not find such path: <{}>".format(path),
                             logging.ERROR, exception.NoSuchPath)
 
     def __remove(self, path):
@@ -117,9 +126,9 @@ class RemoveHandler(object):
 
         if os.path.isfile(path):
             if self.check_regexp(path=path, regexp=self.regexp):
-                if self.asking('Do u want to delete this file: {}?'.format(os.path.basename(path))):
+                if self.asking('Do u want to delete this file: <{}>?'.format(os.path.basename(path))):
                     if self.remove_file(path):
-                        self.logger.log("File {} deleted".format(os.path.basename(path)),
+                        self.logger.log("File <{}> deleted".format(os.path.basename(path)),
                                         logging.INFO)
                         return True
 
@@ -134,17 +143,17 @@ class RemoveHandler(object):
 
     def remove_dir(self, path):
         if not self.is_dir and not self.is_recursive:
-            self.logger.log("cannot remove '{}', it's dir".format(path),
+            self.logger.log("cannot remove <{}>, it's dir".format(path),
                             logging.ERROR, exception.ItIsDirectory)
         elif self.is_dir:
             if len(os.listdir(path)) != 0:
-                self.logger.log("Directory {} not empty".format(path),
+                self.logger.log("Directory <{}> not empty".format(path),
                                 logging.ERROR, exception.NotEmptyDirectory)
             else:
                 if self.asking('''Do u want to delete this empty directory:
-                                  {}?'''.format(os.path.basename(path))):
+                                  <{}>?'''.format(os.path.basename(path))):
                     self.remove_empty_dir(path)
-                    self.logger.log("Directory {} deleted".format(os.path.basename(path)),
+                    self.logger.log("Directory <{}> deleted".format(os.path.basename(path)),
                                     logging.INFO)
         elif self.is_recursive:
 
@@ -155,9 +164,9 @@ class RemoveHandler(object):
 
                 if len(os.listdir(path)) == 0 or self.is_dryrun:
                     if self.asking('''Do you want to delete this empty directory:
-                                    {}?'''.format(os.path.basename(path))):
+                                    <{}>?'''.format(os.path.basename(path))):
                         self.remove_empty_dir(path)
-                        self.logger.log("Directory {} deleted".format(os.path.basename(path)),
+                        self.logger.log("Directory <{}> deleted".format(os.path.basename(path)),
                                         logging.INFO)
                     else:
                         self.file_removed = False
@@ -169,7 +178,7 @@ class RemoveHandler(object):
             if rez != None:
                 if rez.group(0) == path:
                     return True
-            self.logger.log("File not deleted '{}': Does not match the pattern.".format(path),
+            self.logger.log("File not deleted <{}>: Does not match the pattern.".format(path),
                             logging.INFO)
             return False
         else:

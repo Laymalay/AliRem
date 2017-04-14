@@ -3,7 +3,7 @@
 import shutil
 import os
 from os import listdir, mkdir, access, makedirs
-from os.path import join, exists, isfile, basename, isdir, dirname
+from os.path import join, exists, isfile, basename, isdir, dirname, islink
 import logging
 import datetime
 import alirem.basket_list as basketlist
@@ -41,7 +41,6 @@ class BasketHandler(object):
             return True
 
     def move_to_basket(self):
-
         if not exists(self.basket_path):
             mkdir(self.basket_path)
             self.logger.log("Basket was created", logging.INFO)
@@ -86,7 +85,7 @@ class BasketHandler(object):
         return new_name
 
     def check_flags(self):
-        if isdir(self.path):
+        if isdir(self.path) and not islink(self.path):
             if (len(listdir(self.path)) != 0 and self.is_recursive
                     and not self.is_dir) or (len(listdir(self.path)) == 0
                                              and (self.is_dir or self.is_recursive)):

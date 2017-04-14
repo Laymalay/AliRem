@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from os.path import join, exists, isfile, dirname
-from os import remove, makedirs
+from os.path import join, exists, isfile, dirname, isdir, islink
+from os import remove, makedirs, unlink
 import logging
 import shutil
 import alirem.basket_list as basketlist
@@ -19,17 +19,20 @@ def restore(name, basket_path, logger, is_merge=True, is_replace=False, is_progr
         copyhandler = copy.CopyHandler(logger=logger,
                                        is_merge=is_merge,
                                        is_replace=is_replace,
-                                       is_progress=is_progress)
+                                       is_progress=is_progress,
+                                       symlinks=False)
         copyhandler.run(index_name, dst)
 
         if isfile(index_name):
             remove(index_name)
-        else:
+        elif isdir(index_name):
             shutil.rmtree(index_name)
+        elif islink(index_name):
+            unlink(index_name)
         basket_list.remove(element)
 
     else:
-        logger.log("Cannot find such file {} in basket".format(name), logging.WARNING)
+        logger.log("Cannot find such file <{}> in <{}>".format(name, basket_path), logging.WARNING)
         basket_list.save()
 
 

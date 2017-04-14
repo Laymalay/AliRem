@@ -1,0 +1,6 @@
+/usr/local/lib/python2.7/dist-packages/core-1.0-py2.7.egg
+/usr/local/bin/alirm
+/usr/local/bin/showconfig
+/usr/local/bin/alirs
+/usr/local/bin/cleanbasket
+/usr/local/bin/showbasket

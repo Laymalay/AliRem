@@ -12,7 +12,7 @@ import alirem.restore as restorehandler
 from alirem.logger import DefaultLogger
 
 
-class TestRemove(unittest.TestCase):
+class TestRestore(unittest.TestCase):
     testbead_path = "testbead"
     basket = join(testbead_path, "basket")
     empty_dir_path = join(testbead_path, "empty_dir")

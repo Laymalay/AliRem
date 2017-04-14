@@ -77,6 +77,10 @@ def create_parser(mode=REMOVE):
     return namespace
 
 
+def set_codec():
+    import sys
+    reload(sys)
+    sys.setdefaultencoding('UTF8')
 
 def update_params(cmd, default_config, config=None):
     if config is not None:
@@ -116,6 +120,7 @@ def get_logger(config):
 
 
 def main(mode=REMOVE):
+    set_codec()
     args = create_parser(mode)
     if args.json:
         config = getconfig.load_config_file_json(args.configfile)
@@ -143,7 +148,7 @@ def main(mode=REMOVE):
                               is_progress=default_config['progress'])
         if mode == RESTORE:
             for path in args.restorename:
-                alirem.restore(restorename=path, basket_path='basket',
+                alirem.restore(restorename=path, basket_path=default_config['basketpath'],
                                is_merge=default_config['merge'],
                                is_replace=default_config['replace'],
                                is_progress=default_config['progress'])

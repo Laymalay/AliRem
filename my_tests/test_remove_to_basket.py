@@ -9,7 +9,7 @@ from alirem.remove import RemoveHandler
 import alirem.logger as log
 from alirem.logger import DefaultLogger
 
-class TestRemove(unittest.TestCase):
+class TestRemoveToBasket(unittest.TestCase):
     testbead_path = "testbead"
     basket = join(testbead_path, "basket")
     empty_dir_path = join(testbead_path, "empty_dir")

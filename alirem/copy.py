@@ -25,11 +25,10 @@ class CopyHandler(object):
         self.is_progress = is_progress
 
     def run(self, path, dst):
-        if os.path.abspath(path) == dirname(os.path.abspath(dst)):
-            self.logger.log("Please, do not move  <{}> to <{}>".format(basename(path),
-                                                                       basename(dst)),
+        if str(os.path.abspath(dst)).startswith(os.path.abspath(path)):
+            self.logger.log("Error with moving <{}> to <{}>".format(path,
+                                                                    dst),
                             logging.ERROR, exception.Error)
-
         try:
             self.copy(path, dst)
         except exception.PermissionDenied:
@@ -48,7 +47,8 @@ class CopyHandler(object):
                 else:
                     return False
             if isdir(path):
-                if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
+                if os.access(path, os.R_OK) and os.access(path, os.W_OK) \
+                                            and os.access(path, os.X_OK):
                     self.copy_dir(path, dst)
                     return True
                 else:
@@ -112,10 +112,7 @@ class CopyHandler(object):
         dest = os.path.dirname(dst)
         if not os.path.exists(dest):
             makedirs(dest)
-        os.chdir(dirname(dst))
-        linkto = os.path.relpath(os.readlink(src))
-        # os.path.basename(os.path.relpath(os.path.abspath(os.readlink(src))))
-        print linkto+ "|dst-->"+dst + "|src-->"+src
+        linkto = os.readlink(src)
         os.symlink(linkto, dst)
         self.logger.log("Copy symlink \'{}\', to \'{}\'".format(src, dst), logging.INFO)
 
