@@ -58,7 +58,8 @@ class BasketList(object):
         if len(self.list_of_objects_in_basket) > 10:
             size = 0
             for el in self.list_of_objects_in_basket:
-                size += getsize.get_size(el.index_in_basket)
+                if getsize.get_size(el.index_in_basket) is not None:
+                    size += getsize.get_size(el.index_in_basket)
             print 'TOTAL SIZE:'+ str(size)
 
         else:
@@ -73,7 +74,8 @@ class BasketList(object):
                 print 'NAME IN BASKET: '+el.index_in_basket
                 print 'TIME: '+str(el.time)
                 print 'TIME IN BASKET(seconds): '+str((datetime.datetime.now()-el.time).seconds)
-                print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
+                if getsize.get_size(el.index_in_basket) is not None:
+                    print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
                 print '====================================='
 
         print '\n'

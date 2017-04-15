@@ -43,18 +43,21 @@ class RemoveHandler(object):
 
     def unlink(self, path):
         if not self.is_dryrun:
+            #TODO: do i need to delete link after deleting directory or file ?
             if os.path.exists(path):
                 os.unlink(path)
-        self.logger.log("Symlink <{}> removed".format(path), logging.INFO)
+                self.logger.log("Symlink <{}> removed".format(path), logging.INFO)
 
     def go_to_link(self, path):
         inode = os.stat(path).st_ino
-        # realpath = os.path.abspath(os.readlink(path))
+        realpath = os.path.abspath(os.readlink(path))
         # os.path.relpath(os.path.abspath(os.readlink(src)))
         if inode not in self.used_slinks:
             self.used_slinks.append(inode)
-            self._remove(path)
-
+            if os.path.isdir(path):
+                self._remove(path)
+            else:
+                self._remove(realpath)
     def remove_empty_dir(self, path):
         if os.access(path, os.R_OK) and os.access(path, os.W_OK) and os.access(path, os.X_OK):
             self.__remove_empty_dir(path)
