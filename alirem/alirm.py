@@ -10,6 +10,12 @@ DEFAULT_TIME = 300
 DEFAULT_MAXSIZE = 100000000
 
 class Alirem(object):
+    """
+        Alirem is a utility for deleting files, directories and links.
+        Also user can delete file objects to basket and then restore them.
+        Keyword Arguments:
+        -logger -- logger to log all actions
+    """
     def __init__(self, logger=None):
         if logger is None:
             self.logger = DefaultLogger()
@@ -21,6 +27,18 @@ class Alirem(object):
                is_basket=False, basket_path='basket', regexp=None,
                symlinks=False, is_progress=True):
 
+        """
+        Delete objects
+            is_dir -- objects is directory
+            is_recursive -- objects is not empty directory
+            is_interactive -- interactive mode
+            is_dryrun -- dryrun mode
+            is_basket -- move to basket
+            basket_path -- path to basket
+            regexp -- regexp to delete objects in file tree
+            symlinks -- go to symlinks
+            is_progress -- show progress
+        """
         remove_handler = RemoveHandler.RemoveHandler(is_dir=is_dir, is_recursive=is_recursive,
                                                      is_interactive=is_interactive,
                                                      is_dryrun=is_dryrun,
@@ -36,13 +54,26 @@ class Alirem(object):
 
     def restore(self, restorename, basket_path='basket',
                 is_merge=False, is_replace=False, is_progress=True):
+        """ Restore object
+        - restorename -- name of object
+        - basket_path -- path to basket
+        - is_merge -- merge directories
+        - is_replace -- replace directories
+        - is_progress -- show progress
+        """
         restore.restore(name=restorename, basket_path=basket_path,
                         logger=self.logger, is_merge=is_merge,
                         is_replace=is_replace, is_progress=is_progress)
 
     def check_basket_for_cleaning(self, is_show=False, mode='time', basket_path='basket',
                                   time=DEFAULT_TIME, size=DEFAULT_MAXSIZE):
-
+        """Clean basket
+         - is_show --show basket
+         - mode -- mode for cleaning
+         - basket_path -- path to basket
+         - time --deltatime
+         - size -- max size of basket
+        """
         basket_handler = BasketCleaner.CheckBasketHandler(self.logger,
                                                           is_show,
                                                           basket_path,
@@ -53,10 +84,11 @@ class Alirem(object):
         basket_handler.check_basket_for_cleaning()
 
     def get_basket_list(self):
+        """Return array of objects in basket"""
         basket_handler = BasketCleaner.CheckBasketHandler(self.logger)
         basket_handler.get_objects_in_basket()
 
-    def show_basket_list(self):
-        basket_handler = BasketCleaner.CheckBasketHandler(self.logger)
+    def show_basket_list(self, basket_path='basket'):
+        """Show objects in basket"""
+        basket_handler = BasketCleaner.CheckBasketHandler(self.logger, basket_path)
         basket_handler.show_basket()
-
