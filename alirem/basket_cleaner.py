@@ -64,7 +64,7 @@ class CheckBasketHandler(object):
          
     def checking_dir_for_deletion(self, path, time, basket_list, basket_path):
         dir_time = basket_list.search(basename(path), dirname(path)).time
-        if (datetime.datetime.now()-dir_time).seconds >= isodate.parse_duration(time):
+        if (datetime.datetime.now()-dir_time) >= isodate.parse_duration(time):
             shutil.rmtree(path)
             self.logger.log("Remove dir {}".format(basename(path)), logging.INFO)
             basket_list.remove(basket_list.search(basename(path), basket_path))

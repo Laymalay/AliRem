@@ -62,9 +62,9 @@ class Alirem(object):
         - is_replace -- replace directories
         - is_progress -- show progress
         """
-        restore.restore(name=restorename, basket_path=basket_path,
-                        logger=self.logger, is_merge=is_merge,
-                        is_replace=is_replace, is_progress=is_progress)
+        return restore.restore(name=restorename, basket_path=basket_path,
+                               logger=self.logger, is_merge=is_merge,
+                               is_replace=is_replace, is_progress=is_progress)
 
     def check_basket_for_cleaning(self, is_show=False, mode='time', basket_path='basket',
                                   time=DEFAULT_TIME, size=DEFAULT_MAXSIZE):

@@ -9,6 +9,7 @@ import logging
 import alirem.exception as exception
 import alirem.progress as progress
 import threading
+import datetime
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
@@ -62,42 +63,45 @@ class CopyHandler(object):
                 return
             if self.is_replace and exists(path):
                 shutil.rmtree(path)
+                print 'create ', path
                 mkdir(path)
                 return
             if not exists(path) and self.is_merge:
+                print 'create ', path
                 mkdir(path)
                 return
             if not exists(path):
+                print 'create ', path
                 mkdir(path)
 
 
 
     def copy_content(self, path, dst):
-        self.create_dir(dst)
-        treads = []
         for obj in listdir(path):
-            # if not free
-            #     wait for free
-            t = threading.Thread(target=self.copy, args=(join(path, obj), join(dst, obj),))
-            treads.append(t)
-            t.start()
-            print threading.current_thread().getName(), 'Starting'
-            while t.is_alive():
-                pass
-            print threading.currentThread().getName(), 'Exiting'
-            print t
+            if isfile(join(path, obj)):
+                self.copy(join(path, obj), join(dst, obj))
 
 
     def copy_dir(self, path, dst):
         self.create_dir(dst)
         for obj in listdir(path):
-            # self.copy(join(path, obj), join(dst, obj))
+            if isdir(os.path.abspath(join(path,obj))):
+                self.copy(join(path, obj), join(dst, obj))
+
+        t = threading.Thread(target= self.copy_content, args=(path,dst,))
+        t.start()
+        print datetime.datetime.now()
+        print t, 'start'
+        while t.is_alive():
+            pass
+        print t,'exiting'
+
         # for obj in listdir(path):
-            if not self.copy(join(path, obj), join(dst, obj)):
-                self.file_copied = False
-        if self.file_copied:
-            self.logger.log("Directory {0} copied to {1}".format(os.path.basename(path), dst),
-                            logging.INFO)
+        #     if not self.copy(join(path, obj), join(dst, obj)):
+        #         self.file_copied = False
+        # if self.file_copied:
+        #     self.logger.log("Directory {0} copied to {1}".format(os.path.basename(path), dst),
+        #                     logging.INFO)
 
 
 

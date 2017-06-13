@@ -30,11 +30,11 @@ def restore(name, basket_path, logger, is_merge=True, is_replace=False, is_progr
         elif islink(index_name):
             unlink(index_name)
         basket_list.remove(element)
-
+        return True
     else:
         logger.log("Cannot find such file <{}> in <{}>".format(name, basket_path), logging.WARNING)
         basket_list.save()
-
+        return False
 
 
 
