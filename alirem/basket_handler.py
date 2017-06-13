@@ -10,6 +10,10 @@ import alirem.basket_list as basketlist
 import alirem.exception as exception
 import alirem.copy as copy
 
+def create_basket(basket_path, logger):
+    makedirs(basket_path)
+    logger.log("Basket was created", logging.INFO)
+
 
 class BasketHandler(object):
     def __init__(self, logger, path,
@@ -40,15 +44,16 @@ class BasketHandler(object):
         else:
             return True
 
+    # def create_basket(self):
+    #     makedirs(self.basket_path)
+    #     self.logger.log("Basket was created", logging.INFO)
+
     def move_to_basket(self):
         if not exists(self.basket_path):
-            mkdir(self.basket_path)
-            self.logger.log("Basket was created", logging.INFO)
-
+            create_basket(basket_path=self.basket_path, logger=self.logger)
         if self.check_access_for_dir(self.path) and self.check_flags():
-            basket_list = basketlist.BasketList()
+            basket_list = basketlist.BasketList(self.basket_path)
             basket_list.load()
-
 
             name = basename(self.path)
             new_name = self.check_in_basket(name, self.basket_path)

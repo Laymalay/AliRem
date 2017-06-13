@@ -6,7 +6,6 @@ from os.path import exists, basename
 import datetime
 import alirem.getsize as getsize
 
-
 class object_in_basket(object):
     def __init__(self, name, rm_path, basket_path, index_in_basket, time):
         self.rm_path = rm_path
@@ -14,15 +13,15 @@ class object_in_basket(object):
         self.index_in_basket = index_in_basket
         self.name = name
         self.time = time
-
 class BasketList(object):
-    def __init__(self):
+    def __init__(self, basket_path='basket'):#  basket_path='basket'
         self.list_of_objects_in_basket = []
+        self.basket_list_path = os.path.join(basket_path, 'basket_list.pickle')
 
     def search(self, name, basket_path):
         for obj in self.list_of_objects_in_basket:
             if (basename(obj.index_in_basket) == name) and (
-                    os.path.abspath(obj.basket_path) == os.path.abspath(basket_path)):
+                    os.path.abspath(obj.basket_path) == os.path.abspath(obj.basket_path)):
                 return obj
         return None
 
@@ -34,11 +33,11 @@ class BasketList(object):
         self.list_of_objects_in_basket.append(el)
 
     def load(self):
-        if not os.path.exists('basket_list.pickle'):
-            open('basket_list.pickle', 'wb')
+        if not os.path.exists(self.basket_list_path):
+            open(self.basket_list_path, 'wb')
         else:
-            with open('basket_list.pickle', 'rb') as f:
-                if os.path.getsize('basket_list.pickle') > 0:
+            with open(self.basket_list_path, 'rb') as f:
+                if os.path.getsize(self.basket_list_path) > 0:
                     self.list_of_objects_in_basket = pickle.load(f)
                 else:
                     self.list_of_objects_in_basket = []
@@ -48,14 +47,14 @@ class BasketList(object):
                         tmp_arr.append(el)
                 self.list_of_objects_in_basket = tmp_arr
     def save(self):
-        with open('basket_list.pickle', 'wb') as f:
+        with open(self.basket_list_path, 'wb') as f:
             pickle.dump(self.list_of_objects_in_basket, f)
 
     def get_list_of_objects_in_basket(self):
         return self.list_of_objects_in_basket
 
     def show(self):
-        if len(self.list_of_objects_in_basket) > 10:
+        if len(self.list_of_objects_in_basket) > 100:
             size = 0
             for el in self.list_of_objects_in_basket:
                 if getsize.get_size(el.index_in_basket) is not None:
@@ -73,7 +72,7 @@ class BasketList(object):
                 print 'BASKET: '+el.basket_path
                 print 'NAME IN BASKET: '+el.index_in_basket
                 print 'TIME: '+str(el.time)
-                print 'TIME IN BASKET(seconds): '+str((datetime.datetime.now()-el.time).seconds)
+                print 'TIME IN BASKET: '+str((datetime.datetime.now()-el.time))
                 if getsize.get_size(el.index_in_basket) is not None:
                     print 'SIZE: '+str(getsize.get_size(el.index_in_basket))
                 print '====================================='

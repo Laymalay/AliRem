@@ -1,12 +1,13 @@
 # !/usr/bin/python
 # -*- coding: UTF-8
-
+import os.path
 import alirem.remove as RemoveHandler
 import alirem.restore as restore
 import alirem.basket_cleaner as BasketCleaner
 from alirem.logger import DefaultLogger
+from alirem.basket_handler import create_basket
 
-DEFAULT_TIME = 300
+DEFAULT_TIME = 'PT1H'
 DEFAULT_MAXSIZE = 100000000
 
 class Alirem(object):
@@ -24,7 +25,7 @@ class Alirem(object):
 
     def remove(self, path, is_dir=False,
                is_recursive=False, is_interactive=False, is_dryrun=False,
-               is_basket=False, basket_path='basket', regexp=None,
+               is_basket=True, basket_path='basket', regexp=None,
                symlinks=False, is_progress=True):
 
         """
@@ -75,20 +76,30 @@ class Alirem(object):
          - size -- max size of basket
         """
         basket_handler = BasketCleaner.CheckBasketHandler(self.logger,
-                                                          is_show,
-                                                          basket_path,
-                                                          mode,
-                                                          time,
-                                                          size)
-
+                                                          is_show=is_show,
+                                                          basket_path=basket_path,
+                                                          mode=mode,
+                                                          time=time,
+                                                          size=size)
         basket_handler.check_basket_for_cleaning()
+        return basket_path,time,mode,size
 
-    def get_basket_list(self):
+    def get_basket_list(self, basket_path):
         """Return array of objects in basket"""
-        basket_handler = BasketCleaner.CheckBasketHandler(self.logger)
-        basket_handler.get_objects_in_basket()
+        basket_handler = BasketCleaner.CheckBasketHandler(basket_path=basket_path,
+                                                          logger=self.logger)
+        return basket_handler.get_objects_in_basket()
 
-    def show_basket_list(self, basket_path='basket'):
+    def create_basket(self, basket_path):
+        """Create new basket"""
+        if not os.path.exists(os.path.abspath(basket_path)):
+            create_basket(basket_path=os.path.abspath(basket_path), logger=self.logger)
+            return True
+        else:
+            return False
+
+    def show_basket_list(self, basket_path):
         """Show objects in basket"""
+        print basket_path
         basket_handler = BasketCleaner.CheckBasketHandler(self.logger, basket_path)
         basket_handler.show_basket()

@@ -1,0 +1,18 @@
+
+    clearmode="size"
+    deltatime= 120
+    maxsize=100
+    basketpath="basket"
+    basket=false
+    force=false
+    logmodecmd="INFO"
+    logfilepath="alirem"
+    silent=false
+    show=true
+    dryrun=false
+    interactive=false
+    merge=false
+    replace=false
+    symlinks=false
+    progress=false
+    

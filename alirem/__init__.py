@@ -27,3 +27,4 @@ The default parameters:
     * symlinks:false
     * progress:false
 """
+__version__ = "100500.0"

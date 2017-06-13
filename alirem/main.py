@@ -59,7 +59,7 @@ def create_parser(mode=REMOVE):
     if mode == CLEAN_BASKET:
         parser.add_argument('-m', '--clearmode', action='store', choices=['size', 'time'],
                             help='cleaning mode for basket')
-        parser.add_argument('-t', '--deltatime', action='store', type=int,
+        parser.add_argument('-t', '--deltatime', action='store', type=str,
                             help='file storage time in basket')
         parser.add_argument('-x', '--maxsize', action='store', type=int,
                             help='max size of basket')
@@ -69,7 +69,8 @@ def create_parser(mode=REMOVE):
         #                     help='show the contents of the basket')
 
     if mode == SHOW_BASKET_LIST:
-        pass
+        parser.add_argument('-p', '--basketpath', action='store',
+                            help='path to basket')
     if mode == GET_DEFAULT_CONFIG:
         pass
 
@@ -160,7 +161,8 @@ def main(mode=REMOVE):
                                              time=default_config['deltatime'],
                                              size=default_config['maxsize'])
         if mode == SHOW_BASKET_LIST:
-            alirem.show_basket_list()
+            print default_config['basketpath']
+            alirem.show_basket_list(basket_path=default_config['basketpath'])
         if mode == GET_DEFAULT_CONFIG:
             if args.json:
                 print getconfig.get_defaultconfig_json()

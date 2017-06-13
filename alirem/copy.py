@@ -6,9 +6,9 @@ import re
 from os import listdir, mkdir, access, makedirs
 from os.path import join, exists, isfile, basename, isdir, dirname, islink
 import logging
-import alirem.progress as progress
 import alirem.exception as exception
-
+import alirem.progress as progress
+import threading
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
@@ -70,9 +70,29 @@ class CopyHandler(object):
             if not exists(path):
                 mkdir(path)
 
+
+
+    def copy_content(self, path, dst):
+        self.create_dir(dst)
+        treads = []
+        for obj in listdir(path):
+            # if not free
+            #     wait for free
+            t = threading.Thread(target=self.copy, args=(join(path, obj), join(dst, obj),))
+            treads.append(t)
+            t.start()
+            print threading.current_thread().getName(), 'Starting'
+            while t.is_alive():
+                pass
+            print threading.currentThread().getName(), 'Exiting'
+            print t
+
+
     def copy_dir(self, path, dst):
         self.create_dir(dst)
         for obj in listdir(path):
+            # self.copy(join(path, obj), join(dst, obj))
+        # for obj in listdir(path):
             if not self.copy(join(path, obj), join(dst, obj)):
                 self.file_copied = False
         if self.file_copied:

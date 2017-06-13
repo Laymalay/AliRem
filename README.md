@@ -2,6 +2,7 @@
 ===========================================================================
     Alirem is a utility for deleting files, directories and links.
     Also user can delete file objects to basket and then restore them.
+
 **Commands:**
 ---------------------------------------------------------------------------
     After installation, it is used using simple commands:

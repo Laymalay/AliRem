@@ -176,9 +176,9 @@ class RemoveHandler(object):
 
 
     def check_regexp(self, regexp, path):
-        if regexp != None:
+        if regexp:
             rez = re.search(regexp, path)
-            if rez != None:
+            if rez:
                 if rez.group(0) == path:
                     return True
             self.logger.log("File not deleted <{}>: Does not match the pattern.".format(path),
