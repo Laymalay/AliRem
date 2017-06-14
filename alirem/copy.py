@@ -10,6 +10,27 @@ import alirem.exception as exception
 import alirem.progress as progress
 import threading
 import datetime
+import multiprocessing
+
+
+def clean_process_list(working_processes):
+    for proc in working_processes:
+        if not proc.process.is_alive():
+            print proc.path, ' stopped'
+            print 'Directory ', basename(proc.path), 'copied'
+            working_processes.remove(proc)
+
+def could_process_start(working_processes, process):
+    for proc in working_processes:
+        if proc.dirname == process.path:
+            return False
+    return True
+
+class superproc(object):
+    def __init__(self, path, target, args):
+        self.dirname = dirname(path)
+        self.path = path
+        self.process = multiprocessing.Process(target=target, args=args)
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
@@ -26,18 +47,21 @@ class CopyHandler(object):
         self.is_progress = is_progress
 
     def run(self, path, dst):
+        working_processes = []
         if str(os.path.abspath(dst)).startswith(os.path.abspath(path)):
             self.logger.log("Error with moving <{}> to <{}>".format(path,
                                                                     dst),
                             logging.ERROR, exception.Error)
         try:
-            self.copy(path, dst)
+            self.copy(path, dst, working_processes)
+            while working_processes:
+                clean_process_list(working_processes)
         except exception.PermissionDenied:
             if exists(dst):
                 shutil.rmtree(dst)
             raise exception.PermissionDenied
 
-    def copy(self, path, dst):
+    def copy(self, path, dst, working_processes):
         if islink(path) and not self.symlinks:
             self.copy_symlink(path, dst)
             return True
@@ -50,7 +74,7 @@ class CopyHandler(object):
             if isdir(path):
                 if os.access(path, os.R_OK) and os.access(path, os.W_OK) \
                                             and os.access(path, os.X_OK):
-                    self.copy_dir(path, dst)
+                    self.copy_dir(path, dst, working_processes)
                     return True
                 else:
                     return False
@@ -76,25 +100,48 @@ class CopyHandler(object):
 
 
 
-    def copy_content(self, path, dst):
+    def copy_content(self, path, dst, working_processes):
         for obj in listdir(path):
             if isfile(join(path, obj)):
-                self.copy(join(path, obj), join(dst, obj))
+                self.copy(join(path, obj), join(dst, obj), working_processes)
 
 
-    def copy_dir(self, path, dst):
+    def copy_dir(self, path, dst, working_processes):
         self.create_dir(dst)
         for obj in listdir(path):
-            if isdir(os.path.abspath(join(path,obj))):
-                self.copy(join(path, obj), join(dst, obj))
+            if isdir(os.path.abspath(join(path, obj))):
+                self.copy(join(path, obj), join(dst, obj), working_processes)
 
-        t = threading.Thread(target= self.copy_content, args=(path,dst,))
-        t.start()
-        print datetime.datetime.now()
-        print t, 'start'
-        while t.is_alive():
-            pass
-        print t,'exiting'
+        process = superproc(path=path,
+                            target=self.copy_content,
+                            args=(path, dst, working_processes))
+        while not could_process_start(process=process,
+                                      working_processes=working_processes):
+            clean_process_list(working_processes)
+        process.process.start()
+        print basename(process.path), 'start'
+        working_processes.append(process)
+
+        # while working_processes:
+        #     for proc in working_processes:
+        #         if not proc.is_alive():
+        #             working_processes.remove(proc)
+        # print working_processes
+        # print path, dst, dirname(path)
+        # p = multiprocessing.Process(target=self.copy_content,
+        #                             args=(path, dst, working_processes))
+        # working_processes.append(p)
+        # p.start()
+        # print datetime.datetime.now()
+        # print p, 'start'
+
+        # t = threading.Thread(target= self.copy_content, args=(path,dst,))
+        # t.start()
+        # print datetime.datetime.now()
+        # print t, 'start'
+        # while t.is_alive():
+        #     pass
+        # print t,'exiting'
 
         # for obj in listdir(path):
         #     if not self.copy(join(path, obj), join(dst, obj)):
