@@ -5,7 +5,7 @@ import os
 from os.path import exists, basename
 import datetime
 import alirem.getsize as getsize
-
+import threading
 class object_in_basket(object):
     def __init__(self, name, rm_path, basket_path, index_in_basket, time):
         self.rm_path = rm_path
@@ -13,10 +13,12 @@ class object_in_basket(object):
         self.index_in_basket = index_in_basket
         self.name = name
         self.time = time
+
 class BasketList(object):
     def __init__(self, basket_path='basket'):#  basket_path='basket'
         self.list_of_objects_in_basket = []
         self.basket_list_path = os.path.join(basket_path, 'basket_list.pickle')
+        self.lock = threading.Lock()
 
     def search(self, name, basket_path):
         for obj in self.list_of_objects_in_basket:
@@ -33,22 +35,39 @@ class BasketList(object):
         self.list_of_objects_in_basket.append(el)
 
     def load(self):
-        if not os.path.exists(self.basket_list_path):
-            open(self.basket_list_path, 'wb')
-        else:
-            with open(self.basket_list_path, 'rb') as f:
-                if os.path.getsize(self.basket_list_path) > 0:
-                    self.list_of_objects_in_basket = pickle.load(f)
-                else:
-                    self.list_of_objects_in_basket = []
-                tmp_arr = []
-                for el in self.list_of_objects_in_basket:
-                    if exists(el.index_in_basket) or os.path.islink(el.index_in_basket):
-                        tmp_arr.append(el)
-                self.list_of_objects_in_basket = tmp_arr
+        have_it = False
+        while not have_it:
+            have_it = self.lock.acquire(False)
+            try:
+                if have_it:
+                    if not os.path.exists(self.basket_list_path):
+                        open(self.basket_list_path, 'wb')
+                    else:
+                        with open(self.basket_list_path, 'rb') as f:
+                            if os.path.getsize(self.basket_list_path) > 0:
+                                self.list_of_objects_in_basket = pickle.load(f)
+                            else:
+                                self.list_of_objects_in_basket = []
+                            tmp_arr = []
+                            for el in self.list_of_objects_in_basket:
+                                if exists(el.index_in_basket) or os.path.islink(el.index_in_basket):
+                                    tmp_arr.append(el)
+                            self.list_of_objects_in_basket = tmp_arr
+            finally:
+                if have_it:
+                    self.lock.release()
+
     def save(self):
-        with open(self.basket_list_path, 'wb') as f:
-            pickle.dump(self.list_of_objects_in_basket, f)
+        have_it = False
+        while not have_it:
+            have_it = self.lock.acquire(False)
+            try:
+                if have_it:
+                    with open(self.basket_list_path, 'wb') as f:
+                        pickle.dump(self.list_of_objects_in_basket, f)
+            finally:
+                if have_it:
+                    self.lock.release()
 
     def get_list_of_objects_in_basket(self):
         return self.list_of_objects_in_basket

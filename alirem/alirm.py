@@ -17,9 +17,9 @@ class Alirem(object):
         Keyword Arguments:
         -logger -- logger to log all actions
     """
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, is_force=False):
         if logger is None:
-            self.logger = DefaultLogger()
+            self.logger = DefaultLogger(is_force)
         else:
             self.logger = logger
 

@@ -160,6 +160,7 @@ def main(mode=REMOVE):
                                              mode=default_config['clearmode'],
                                              time=default_config['deltatime'],
                                              size=default_config['maxsize'])
+                    
         if mode == SHOW_BASKET_LIST:
             print default_config['basketpath']
             alirem.show_basket_list(basket_path=default_config['basketpath'])

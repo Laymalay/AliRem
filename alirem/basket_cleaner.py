@@ -34,12 +34,13 @@ class CheckBasketHandler(object):
             if self.mode == 'size':
                 if getsize.get_size(self.basket_path) >= int(self.size):
                     for obj in listdir(self.basket_path):
-                        if isfile(join(self.basket_path, obj)):
-                            remove(join(self.basket_path, obj))
-                            self.basket_list.remove(self.basket_list.search(obj, self.basket_path))
-                        else:
-                            shutil.rmtree(join(self.basket_path, obj))
-                            self.basket_list.remove(self.basket_list.search(obj, self.basket_path))
+                        if obj != 'basket_list.pickle':
+                            if isfile(join(self.basket_path, obj)):
+                                remove(join(self.basket_path, obj))
+                                self.basket_list.remove(self.basket_list.search(obj, self.basket_path))
+                            else:
+                                shutil.rmtree(join(self.basket_path, obj))
+                                self.basket_list.remove(self.basket_list.search(obj, self.basket_path))
 
             elif self.mode == 'time':
                 for obj in listdir(self.basket_path):
@@ -61,7 +62,6 @@ class CheckBasketHandler(object):
             remove(path)
             self.logger.log("Remove file {}".format(basename(path)), logging.INFO)
             basket_list.remove(basket_list.search(basename(path), basket_path))
-         
     def checking_dir_for_deletion(self, path, time, basket_list, basket_path):
         dir_time = basket_list.search(basename(path), dirname(path)).time
         if (datetime.datetime.now()-dir_time) >= isodate.parse_duration(time):

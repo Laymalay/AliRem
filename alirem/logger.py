@@ -75,7 +75,3 @@ class Logger(object):
             self.logger.log(level, msg)
         if error is not None and not self.is_force:
             raise error()
-
-
-
-

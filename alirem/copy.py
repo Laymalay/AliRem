@@ -30,7 +30,7 @@ class superproc(object):
     def __init__(self, path, target, args):
         self.dirname = dirname(path)
         self.path = path
-        self.process = multiprocessing.Process(target=target, args=args)
+        self.process = threading.Thread(target=target, args=args)
 
 class CopyHandler(object):
     def __init__(self, logger, is_merge=False, is_replace=False,
@@ -45,6 +45,7 @@ class CopyHandler(object):
         self.regexp = regexp
         self.symlinks = symlinks
         self.is_progress = is_progress
+        self.lock = threading.Lock()
 
     def run(self, path, dst):
         working_processes = []
@@ -122,34 +123,6 @@ class CopyHandler(object):
         print basename(process.path), 'start'
         working_processes.append(process)
 
-        # while working_processes:
-        #     for proc in working_processes:
-        #         if not proc.is_alive():
-        #             working_processes.remove(proc)
-        # print working_processes
-        # print path, dst, dirname(path)
-        # p = multiprocessing.Process(target=self.copy_content,
-        #                             args=(path, dst, working_processes))
-        # working_processes.append(p)
-        # p.start()
-        # print datetime.datetime.now()
-        # print p, 'start'
-
-        # t = threading.Thread(target= self.copy_content, args=(path,dst,))
-        # t.start()
-        # print datetime.datetime.now()
-        # print t, 'start'
-        # while t.is_alive():
-        #     pass
-        # print t,'exiting'
-
-        # for obj in listdir(path):
-        #     if not self.copy(join(path, obj), join(dst, obj)):
-        #         self.file_copied = False
-        # if self.file_copied:
-        #     self.logger.log("Directory {0} copied to {1}".format(os.path.basename(path), dst),
-        #                     logging.INFO)
-
 
 
     def copy_file(self, path, dst):
@@ -206,4 +179,3 @@ class CopyHandler(object):
             return False
         else:
             return True
-
